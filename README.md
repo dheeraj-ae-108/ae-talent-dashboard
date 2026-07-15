@@ -46,6 +46,15 @@ Your live URL will be `https://<user>.github.io/<repo>/`.
 
 > Do **not** commit the raw 130 MB CSV — `ae_data.json` is the only data the site needs.
 
+## Interactivity (cross-filtering)
+Tap/click a category in a source chart to drill its partner chart in the same section:
+- **Domain landscape** — tap a vertical bar → Qualification donut shows that vertical's degree mix.
+- **PhD network** — tap a domain slice → Top-specializations bar shows that domain's specializations.
+- **Company landscape** — tap a tier slice → Top-employers bar shows that tier's employers.
+- **Experience & language** — tap a language slice → filters the whole dashboard (same as the pills), including a per-language experience histogram.
+
+The active selection appears as a clearable chip (`▸ Name ✕`); tap the same category again or the chip to reset. Cross-tab data lives in `qual_by_vertical` / per-language `experience_hist` (aggregate.py) and `employers_by_tier` / `phd_specs_by_domain` (aggregate_xlsx.py). Note: Tech section isn't cross-filterable because its stack (xlsx, full pool) and dept/exp (CSV, person-level) come from different sources with no join key.
+
 ## What the panels show
 - **KPIs** — filtered candidate count, median/avg experience, PhD network size, tech pool size.
 - **Language filter** — re-slices every filterable panel live (candidate spec requirement).
