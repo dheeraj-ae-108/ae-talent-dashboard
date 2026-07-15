@@ -1,0 +1,6 @@
+# Raw source data (large / contains candidate rows) — never commit
+*.csv
+*.xlsx
+# OS
+.DS_Store
+.claude/
