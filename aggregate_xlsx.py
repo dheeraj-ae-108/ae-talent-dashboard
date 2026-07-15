@@ -89,6 +89,10 @@ org["tier"] = org["v"].map(company_tier)
 company_tiers_full = org.groupby("tier")["n"].sum().sort_values(ascending=False).astype(int).to_dict()
 prem = org[org["tier"].isin(["FAANG / Global Big-Tech","Indian IT / Global Consulting","Unicorn / Funded Startup"])]
 top_employers_full = prem.sort_values("n", ascending=False).head(18).set_index("v")["n"].astype(int).to_dict()
+# top employers per tier (for company-landscape cross-filter)
+employers_by_tier = {}
+for tier, g in org.groupby("tier"):
+    employers_by_tier[tier] = g.sort_values("n", ascending=False).head(15).set_index("v")["n"].astype(int).to_dict()
 
 # sub-departments (full pool, top 15, skip blank)
 subdepts_full = sub.sort_values("n", ascending=False).head(15).set_index("v")["n"].astype(int).to_dict()
@@ -104,6 +108,11 @@ phd_domain_full = phd_spec.groupby("dom")["n"].sum().sort_values(ascending=False
 phd_total_full = int(phd_spec["n"].sum())
 phd_top_spec_full = (phd_spec[phd_spec["spec"].notna()].groupby("spec")["n"].sum()
                      .sort_values(ascending=False).head(18).astype(int).to_dict())
+# top PhD specializations per domain (for PhD-network cross-filter)
+phd_specs_by_domain = {}
+for dom, g in phd_spec[phd_spec["spec"].notna()].groupby("dom"):
+    phd_specs_by_domain[dom] = (g.groupby("spec")["n"].sum()
+                                .sort_values(ascending=False).head(15).astype(int).to_dict())
 
 data = json.load(open(OUT))
 data["full"] = {
@@ -112,12 +121,14 @@ data["full"] = {
     "tech_titled_total": tech_titled_total,
     "company_tiers": company_tiers_full,
     "top_employers": top_employers_full,
+    "employers_by_tier": employers_by_tier,
     "subdepartments": subdepts_full,
     "qualifications": qualifications_full,
     "top_specializations": top_specializations_full,
     "phd_by_domain": phd_domain_full,
     "phd_total": phd_total_full,
     "phd_top_specializations": phd_top_spec_full,
+    "phd_specs_by_domain": phd_specs_by_domain,
 }
 json.dump(data, open(OUT, "w"), separators=(",", ":"), default=str)
 print("merged full-pool distributions into", OUT)

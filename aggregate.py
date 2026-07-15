@@ -218,11 +218,17 @@ def panel_for(sub):
     ph = sub[sub["qual"] == "PhD"].copy()
     ph_dom = ph["specialization_title"].map(phd_domain).value_counts().to_dict() if len(ph) else {}
     tk = sub[sub["department"].isin(TECH_DEPTS)]
+    ehist = sub["yoe"].value_counts()
+    ehist = {int(k): int(v) for k, v in ehist.items() if k <= 35}
+    # qualification distribution per vertical (for domain-landscape cross-filter)
+    qbv = {vert: g["qual"].value_counts().to_dict() for vert, g in sub.groupby("vertical")}
     return {
         "n": int(n),
         "qualifications": sub["qual"].value_counts().to_dict(),
         "experience_buckets": sub["expb"].value_counts().to_dict(),
+        "experience_hist": ehist,
         "verticals": verts,
+        "qual_by_vertical": qbv,
         "phd_by_domain": ph_dom,
         "phd_count": int(len(ph)),
         "tech_by_department": tk["department"].value_counts().to_dict(),

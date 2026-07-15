@@ -56,6 +56,11 @@ h1 span{color:var(--mint)}
 .tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:6px;margin-left:6px;font-weight:500;
   background:#e9f4f2;color:var(--accent);border:1px solid #cfe6e2;vertical-align:middle;text-transform:none;letter-spacing:0}
 .tag.warn{background:#fdf0e3;color:#b45309;border-color:#f3d9be}
+.xf{display:none;margin-left:6px;font-size:10.5px;padding:1px 8px 1px 9px;border-radius:20px;
+  background:var(--accent);color:#fff;cursor:pointer;white-space:nowrap;font-weight:500}
+.xf.on{display:inline-block}
+.xf b{font-weight:700}
+.hint{color:#9aa0a8;font-style:italic}
 .sec{margin:30px 0 4px;font-size:12.5px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;
   border-top:1px solid var(--panel-brd);padding-top:18px;font-weight:600}
 .notes{margin-top:30px;background:var(--bg-soft);border:1px solid var(--panel-brd);border-radius:14px;padding:18px 22px;
@@ -102,10 +107,10 @@ h1 span{color:var(--mint)}
 <div class="sec">Domain landscape</div>
 <div class="grid">
   <div class="card c8"><h3>Domain segment share (%) vs. median years of experience</h3>
-    <div class="cn">Verticals derived from department. Bars = share of filtered pool · line = median years.</div>
+    <div class="cn">Verticals derived from department. Bars = share of filtered pool · line = median years. <span class="hint">Tap a bar to break it down by qualification →</span></div>
     <div id="verticals" class="chart" style="height:340px"></div></div>
   <div class="card c4"><h3>Qualification levels</h3>
-    <div class="cn">Highest degree per candidate.</div>
+    <div class="cn">Highest degree per candidate.<span class="xf" id="xfQual"></span></div>
     <div id="qual" class="chart" style="height:365px"></div></div>
 </div>
 
@@ -115,17 +120,17 @@ h1 span{color:var(--mint)}
     <div class="cn">Person-level. Pool floor is ~10 years.</div>
     <div id="exphist" class="chart"></div></div>
   <div class="card c4"><h3>Multi-lingual pool <span class="tag">global</span></h3>
-    <div class="cn">Language mentions across candidates (multi-select).</div>
+    <div class="cn">Language mentions across candidates. <span class="hint">Tap a language to filter the whole dashboard →</span></div>
     <div id="lang" class="chart" style="height:365px"></div></div>
 </div>
 
 <div class="sec">PhD network</div>
 <div class="grid">
   <div class="card c5"><h3>PhDs by domain</h3>
-    <div class="cn">Filtered pool · from specialization title.</div>
+    <div class="cn">Filtered pool · from specialization title. <span class="hint">Tap a domain to see its specializations →</span></div>
     <div id="phdDomain" class="chart" style="height:365px"></div></div>
   <div class="card c7"><h3>Top PhD specializations <span class="tag">full pool</span></h3>
-    <div class="cn">Full ~1.40M-record pool · 22,826 PhDs.</div>
+    <div class="cn">Full ~1.40M-record pool · 22,826 PhDs.<span class="xf" id="xfPhd"></span></div>
     <div id="phdSpec" class="chart"></div></div>
 </div>
 
@@ -145,10 +150,10 @@ h1 span{color:var(--mint)}
 <div class="sec">Company landscape <span class="tag">derived · full pool</span></div>
 <div class="grid">
   <div class="card c5"><h3>Whole pool by company tier</h3>
-    <div class="cn">Employer name matched to tier across the full ~1.40M-record pool. 97% of records name an employer.</div>
+    <div class="cn">Employer name matched to tier across the full ~1.40M-record pool. <span class="hint">Tap a tier to see its top employers →</span></div>
     <div id="companyTiers" class="chart" style="height:365px"></div></div>
   <div class="card c7"><h3>Top employers in premium tiers</h3>
-    <div class="cn">Most common FAANG / Indian-IT / unicorn employers (full pool).</div>
+    <div class="cn">Most common FAANG / Indian-IT / unicorn employers (full pool).<span class="xf" id="xfEmp"></span></div>
     <div id="topEmp" class="chart"></div></div>
 </div>
 
@@ -246,9 +251,8 @@ function verticalsChart(v){
         lineStyle:{color:'#f0a15c',width:3},itemStyle:{color:'#f0a15c'},symbolSize:7,z:3}]});
 }
 
-// ---- static (non-filtered) charts drawn after init below ----
-function expHist(){
-  const e=Object.entries(D.experience_hist).map(([k,v])=>[+k,v]).sort((a,b)=>a[0]-b[0]);
+function expHist(hist){
+  const e=Object.entries(hist).map(([k,v])=>[+k,v]).sort((a,b)=>a[0]-b[0]);
   charts.exphist.setOption({tooltip:{...baseTip,trigger:'axis'},
     grid:{left:8,right:20,top:14,bottom:24,containLabel:true},
     xAxis:{type:'category',data:e.map(x=>x[0]),name:'years',nameTextStyle:{color:AX},axisLabel:{color:AX}},
@@ -256,20 +260,52 @@ function expHist(){
     series:[{type:'bar',data:e.map(x=>x[1]),itemStyle:{color:'#0e7c72',borderRadius:[3,3,0,0]}}]});
 }
 
-// ---- filterable charts ----
+// ---- filterable + cross-filter charts ----
 const EXP_ORDER=['<10 yrs','10–12 yrs','13–15 yrs','16–20 yrs','20+ yrs'];
 function orderExp(o){const r={};EXP_ORDER.forEach(k=>{if(o[k])r[k]=o[k]});return r;}
+const F = D.full || {};
+let active='All';            // active language filter
+let selVert=null,selPhd=null,selTier=null;   // per-section drill selections
+function curP(){return D.by_language[active]||D.by_language['All'];}
+
+function chip(id,label,clearFn){
+  const el=document.getElementById(id);
+  if(!label){el.className='xf';el.innerHTML='';el.onclick=null;return;}
+  el.className='xf on';el.innerHTML='▸ <b>'+label+'</b> &nbsp;✕';el.onclick=clearFn;
+}
+function drawQual(){
+  const P=curP();
+  const src=(selVert&&P.qual_by_vertical&&P.qual_by_vertical[selVert])?P.qual_by_vertical[selVert]:P.qualifications;
+  donut('qual',src);
+  chip('xfQual',selVert,()=>{selVert=null;drawQual();});
+}
+function drawPhdSpec(){
+  const src=(selPhd&&F.phd_specs_by_domain&&F.phd_specs_by_domain[selPhd])?F.phd_specs_by_domain[selPhd]:(F.phd_top_specializations||D.phd.top_specializations);
+  hbar('phdSpec',src,'#8b7ec8',15);
+  chip('xfPhd',selPhd,()=>{selPhd=null;drawPhdSpec();});
+}
+function drawTopEmp(){
+  const src=(selTier&&F.employers_by_tier&&F.employers_by_tier[selTier])?F.employers_by_tier[selTier]:(F.top_employers||D.top_employers);
+  hbar('topEmp',src,'#12a37a',14);
+  chip('xfEmp',selTier?SHORT(selTier):null,()=>{selTier=null;drawTopEmp();});
+}
+function setLang(l){
+  active=l;
+  [...fb.querySelectorAll('.pill')].forEach(p=>p.classList.toggle('on',p.textContent===l));
+  render(l);
+}
 function render(langKey){
-  const P = D.by_language[langKey] || D.by_language['All'];
+  active=langKey;
+  const P=curP();
   verticalsChart(P.verticals);
-  donut('qual', P.qualifications);
-  donut('phdDomain', P.phd_by_domain);
-  hbar('techDept', P.tech_by_department, '#6ad1fa');
-  donut('techExp', orderExp(P.experience_buckets));
-  // KPIs
-  document.getElementById('kpi-n').textContent = fmt(P.n);
-  document.getElementById('kpi-phd').textContent = fmt(P.phd_count);
-  document.getElementById('kpi-tech').textContent = fmt(P.tech_count);
+  drawQual();
+  donut('phdDomain',P.phd_by_domain);
+  hbar('techDept',P.tech_by_department,'#6ad1fa');
+  donut('techExp',orderExp(P.experience_buckets));
+  expHist(P.experience_hist||D.experience_hist);
+  document.getElementById('kpi-n').textContent=fmt(P.n);
+  document.getElementById('kpi-phd').textContent=fmt(P.phd_count);
+  document.getElementById('kpi-tech').textContent=fmt(P.tech_count);
 }
 function fmt(n){return n>=1000?(n/1000).toFixed(n>=100000?0:1)+'K':n;}
 
@@ -289,27 +325,29 @@ document.getElementById('kpis').innerHTML = `
 // ---- language filter pills ----
 const fb=document.getElementById('filterbar');
 const langs=['All',...Object.keys(D.languages)];
-let active='All';
 langs.forEach(l=>{
   const b=document.createElement('button');b.className='pill'+(l==='All'?' on':'');b.textContent=l;
-  b.onclick=()=>{active=l;[...fb.querySelectorAll('.pill')].forEach(p=>p.classList.toggle('on',p.textContent===l));render(l);};
+  b.onclick=()=>setLang(l);
   fb.appendChild(b);
 });
 
 // init
-const F = D.full || {};
 ['verticals','qual','exphist','lang','phdDomain','phdSpec','techStack',
  'techDept','techExp','companyTiers','topEmp','subDept','specTop','deptRaw','tiers'].forEach(mk);
 donut('lang', D.languages);
-hbar('phdSpec', F.phd_top_specializations || D.phd.top_specializations, '#8b7ec8', 15);
 hbar('techStack', F.tech_stack || D.tech.by_stack, '#0e7c72', 16);
 donut('companyTiers', F.company_tiers || D.company_tiers);
-hbar('topEmp', F.top_employers || D.top_employers, '#12a37a', 14);
 hbar('subDept', F.subdepartments || {}, '#2fb89a', 15);
 hbar('specTop', F.top_specializations || {}, '#6ad1fa', 15);
 hbar('deptRaw', D.departments_top, '#2fb89a', 15);
 hbar('tiers', D.institute_tiers, '#f0a15c');
-expHist();
+drawPhdSpec();
+drawTopEmp();
+// ---- cross-filter click handlers (tap a source category → partner chart updates) ----
+charts.verticals.on('click',p=>{if(p.componentType==='series'&&p.seriesType==='bar'){selVert=(selVert===p.name)?null:p.name;drawQual();}});
+charts.phdDomain.on('click',p=>{if(p.data){selPhd=(selPhd===p.name)?null:p.name;drawPhdSpec();}});
+charts.companyTiers.on('click',p=>{if(p.data){selTier=(selTier===p.name)?null:p.name;drawTopEmp();}});
+charts.lang.on('click',p=>{if(p.data){setLang(active===p.name?'All':p.name);}});
 render('All');
 window.addEventListener('resize',()=>Object.values(charts).forEach(c=>c.resize()));
 </script>
