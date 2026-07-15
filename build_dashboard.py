@@ -52,7 +52,7 @@ h1 span{color:var(--mint)}
 .card h3{margin:0 0 2px;font-size:14.5px;font-weight:600;color:var(--ink)}
 .card .cn{font-size:11.5px;color:var(--ink-dim);margin-bottom:6px;line-height:1.5}
 .chart{width:100%;height:300px}
-.c6{grid-column:span 6}.c4{grid-column:span 4}.c8{grid-column:span 8}.c12{grid-column:span 12}
+.c4{grid-column:span 4}.c5{grid-column:span 5}.c6{grid-column:span 6}.c7{grid-column:span 7}.c8{grid-column:span 8}.c12{grid-column:span 12}
 .tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:6px;margin-left:6px;font-weight:500;
   background:#e9f4f2;color:var(--accent);border:1px solid #cfe6e2;vertical-align:middle;text-transform:none;letter-spacing:0}
 .tag.warn{background:#fdf0e3;color:#b45309;border-color:#f3d9be}
@@ -62,7 +62,7 @@ h1 span{color:var(--mint)}
   font-size:12.5px;color:var(--ink-dim);line-height:1.7}
 .notes b{color:var(--ink)}
 .notes ul{margin:8px 0 0;padding-left:20px}
-@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.c6,.c4,.c8{grid-column:span 12}}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.c4,.c5,.c6,.c7,.c8{grid-column:span 12}}
 </style>
 </head>
 <body>
@@ -121,10 +121,10 @@ h1 span{color:var(--mint)}
 
 <div class="sec">PhD network</div>
 <div class="grid">
-  <div class="card c5" style="grid-column:span 5"><h3>PhDs by domain</h3>
+  <div class="card c5"><h3>PhDs by domain</h3>
     <div class="cn">Filtered pool · from specialization title.</div>
     <div id="phdDomain" class="chart"></div></div>
-  <div class="card c7" style="grid-column:span 7"><h3>Top PhD specializations <span class="tag">full pool</span></h3>
+  <div class="card c7"><h3>Top PhD specializations <span class="tag">full pool</span></h3>
     <div class="cn">Full ~1.40M-record pool · 22,826 PhDs.</div>
     <div id="phdSpec" class="chart"></div></div>
 </div>
@@ -144,10 +144,10 @@ h1 span{color:var(--mint)}
 
 <div class="sec">Company landscape <span class="tag">derived · full pool</span></div>
 <div class="grid">
-  <div class="card c5" style="grid-column:span 5"><h3>Whole pool by company tier</h3>
+  <div class="card c5"><h3>Whole pool by company tier</h3>
     <div class="cn">Employer name matched to tier across the full ~1.40M-record pool. 97% of records name an employer.</div>
     <div id="companyTiers" class="chart"></div></div>
-  <div class="card c7" style="grid-column:span 7"><h3>Top employers in premium tiers</h3>
+  <div class="card c7"><h3>Top employers in premium tiers</h3>
     <div class="cn">Most common FAANG / Indian-IT / unicorn employers (full pool).</div>
     <div id="topEmp" class="chart"></div></div>
 </div>
@@ -188,17 +188,27 @@ echarts.registerTheme('ae',{});
 const charts = {};
 function mk(id){const c=echarts.init(document.getElementById(id),null,{renderer:'canvas'});charts[id]=c;return c;}
 const baseTip={backgroundColor:'#15171b',borderColor:'#2a2d33',borderWidth:1,textStyle:{color:'#f4f4f2'}};
+const SHORTMAP={'Undergraduate':'Undergrad','Diploma / Certificate':'Diploma','PG Diploma':'PG Dip',
+  'Humanities & Social Sciences':'Humanities','Finance & Economics':'Finance/Econ','Medicine & Health':'Medicine',
+  'Other / Unspecified':'Other','Other / Unclassified':'Other','FAANG / Global Big-Tech':'FAANG / Big-Tech',
+  'Indian IT / Global Consulting':'Indian IT','Unicorn / Funded Startup':'Unicorn','Bank / BFSI / Large Enterprise':'BFSI / Enterprise'};
+function SHORT(n){return SHORTMAP[n]||n;}
 function sortObj(o){return Object.entries(o).sort((a,b)=>b[1]-a[1]);}
 function donut(id,obj,title){
   const e=sortObj(obj);
   const tot=e.reduce((s,x)=>s+x[1],0)||1;
-  charts[id].setOption({tooltip:{...baseTip,trigger:'item',formatter:'{b}: {c} ({d}%)'},
+  charts[id].setOption({tooltip:{...baseTip,trigger:'item',
+      formatter:p=>'<b>'+p.name+'</b><br/>'+p.value.toLocaleString()+' ('+p.percent+'%)'},
     legend:{show:false},
-    series:[{type:'pie',radius:['48%','74%'],center:['50%','52%'],avoidLabelOverlap:true,minAngle:2,
+    series:[{type:'pie',radius:['47%','70%'],center:['50%','50%'],avoidLabelOverlap:true,minAngle:2,
       itemStyle:{borderColor:'#ffffff',borderWidth:2},
-      label:{color:AX,fontSize:11,formatter:p=> p.percent<2 ? '' : p.name+'\n'+p.percent+'%'},
-      labelLine:{lineStyle:{color:AX},smooth:true},
-      data:e.map((x,i)=>({name:x[0],value:x[1],itemStyle:{color:PAL[i%PAL.length]}}))}]});
+      label:{color:AX,fontSize:10.5,lineHeight:14,overflow:'none',
+        formatter:p=>'{n|'+SHORT(p.name)+'}\n{v|'+p.percent+'%}',
+        rich:{n:{color:'#3a3f47',fontSize:10.5,overflow:'none'},v:{color:AX,fontSize:10}}},
+      labelLine:{length:8,length2:8,lineStyle:{color:'#b8bcc2'},smooth:true},
+      data:e.map((x,i)=>{const pct=x[1]/tot*100;return {name:x[0],value:x[1],
+        label:{show:pct>=2.2},labelLine:{show:pct>=2.2},
+        itemStyle:{color:PAL[i%PAL.length]}};})}]});
 }
 function hbar(id,obj,color,top){
   let e=sortObj(obj); if(top)e=e.slice(0,top); e.reverse();
@@ -219,17 +229,22 @@ function verticalsChart(v){
   v=[...v].sort((a,b)=>b.count-a.count);
   charts.verticals.setOption({
     tooltip:{...baseTip,trigger:'axis',axisPointer:{type:'shadow'},
-      formatter:p=>{let s=p[0].axisValue+'<br/>';p.forEach(x=>{s+=x.marker+x.seriesName+': '+
-        (x.seriesName.includes('Median')?x.value+' yrs':x.value+'%')+'<br/>'});return s;}},
-    legend:{textStyle:{color:AX},top:0},
-    grid:{left:8,right:34,top:34,bottom:60,containLabel:true},
-    xAxis:{type:'category',data:v.map(x=>x.name),axisLabel:{color:AX,rotate:32,fontSize:10,interval:0}},
-    yAxis:[{type:'value',name:'Share %',nameTextStyle:{color:AX},axisLabel:{color:AX,formatter:'{value}%'},splitLine:{lineStyle:{color:GRID}}},
-           {type:'value',name:'Median yrs',nameTextStyle:{color:AX},axisLabel:{color:AX},splitLine:{show:false},min:8}],
+      formatter:p=>{const i=p[0].dataIndex,d=v[i];
+        return '<b>'+p[0].axisValue+'</b><br/>'+
+          p[0].marker+'Share: <b>'+d.share+'%</b><br/>'+
+          '&nbsp;&nbsp;&nbsp;&nbsp;Candidates: <b>'+d.count.toLocaleString()+'</b><br/>'+
+          p[1].marker+'Median exp: <b>'+d.median_yoe+' yrs</b>';}},
+    legend:{textStyle:{color:AX},top:0,itemGap:16},
+    grid:{left:26,right:38,top:36,bottom:72,containLabel:true},
+    xAxis:{type:'category',data:v.map(x=>x.name),axisLabel:{color:AX,rotate:30,fontSize:9.5,interval:0,margin:12},
+      axisTick:{show:false}},
+    yAxis:[{type:'value',name:'Share %',nameTextStyle:{color:AX},nameGap:14,axisLabel:{color:AX,formatter:'{value}%'},splitLine:{lineStyle:{color:GRID}}},
+           {type:'value',name:'Median yrs',nameTextStyle:{color:AX},nameGap:14,axisLabel:{color:AX},splitLine:{show:false},min:8}],
     series:[
-      {name:'Share %',type:'bar',barMaxWidth:34,data:v.map(x=>x.share),itemStyle:{color:'#0e7c72',borderRadius:[4,4,0,0]}},
+      {name:'Share %',type:'bar',barMaxWidth:34,data:v.map(x=>x.share),itemStyle:{color:'#0e7c72',borderRadius:[4,4,0,0]},
+        label:{show:true,position:'top',color:'#5a5f67',fontSize:9,fontWeight:500,formatter:p=>fmt(v[p.dataIndex].count)}},
       {name:'Median exp',type:'line',yAxisIndex:1,data:v.map(x=>x.median_yoe),smooth:true,
-        lineStyle:{color:'#f0a15c',width:3},itemStyle:{color:'#f0a15c'},symbolSize:7}]});
+        lineStyle:{color:'#f0a15c',width:3},itemStyle:{color:'#f0a15c'},symbolSize:7,z:3}]});
 }
 
 // ---- static (non-filtered) charts drawn after init below ----
