@@ -106,7 +106,7 @@ h1 span{color:var(--mint)}
     <div id="verticals" class="chart" style="height:340px"></div></div>
   <div class="card c4"><h3>Qualification levels</h3>
     <div class="cn">Highest degree per candidate.</div>
-    <div id="qual" class="chart" style="height:340px"></div></div>
+    <div id="qual" class="chart" style="height:365px"></div></div>
 </div>
 
 <div class="sec">Experience &amp; language</div>
@@ -116,14 +116,14 @@ h1 span{color:var(--mint)}
     <div id="exphist" class="chart"></div></div>
   <div class="card c4"><h3>Multi-lingual pool <span class="tag">global</span></h3>
     <div class="cn">Language mentions across candidates (multi-select).</div>
-    <div id="lang" class="chart"></div></div>
+    <div id="lang" class="chart" style="height:365px"></div></div>
 </div>
 
 <div class="sec">PhD network</div>
 <div class="grid">
   <div class="card c5"><h3>PhDs by domain</h3>
     <div class="cn">Filtered pool · from specialization title.</div>
-    <div id="phdDomain" class="chart"></div></div>
+    <div id="phdDomain" class="chart" style="height:365px"></div></div>
   <div class="card c7"><h3>Top PhD specializations <span class="tag">full pool</span></h3>
     <div class="cn">Full ~1.40M-record pool · 22,826 PhDs.</div>
     <div id="phdSpec" class="chart"></div></div>
@@ -139,14 +139,14 @@ h1 span{color:var(--mint)}
     <div id="techDept" class="chart"></div></div>
   <div class="card c6"><h3>Tech pool by experience band <span class="tag warn">export sample</span></h3>
     <div class="cn">Filtered tech candidates (person-level export).</div>
-    <div id="techExp" class="chart"></div></div>
+    <div id="techExp" class="chart" style="height:365px"></div></div>
 </div>
 
 <div class="sec">Company landscape <span class="tag">derived · full pool</span></div>
 <div class="grid">
   <div class="card c5"><h3>Whole pool by company tier</h3>
     <div class="cn">Employer name matched to tier across the full ~1.40M-record pool. 97% of records name an employer.</div>
-    <div id="companyTiers" class="chart"></div></div>
+    <div id="companyTiers" class="chart" style="height:365px"></div></div>
   <div class="card c7"><h3>Top employers in premium tiers</h3>
     <div class="cn">Most common FAANG / Indian-IT / unicorn employers (full pool).</div>
     <div id="topEmp" class="chart"></div></div>
@@ -199,15 +199,14 @@ function donut(id,obj,title){
   const tot=e.reduce((s,x)=>s+x[1],0)||1;
   charts[id].setOption({tooltip:{...baseTip,trigger:'item',
       formatter:p=>'<b>'+p.name+'</b><br/>'+p.value.toLocaleString()+' ('+p.percent+'%)'},
-    legend:{show:false},
-    series:[{type:'pie',radius:['47%','70%'],center:['50%','50%'],avoidLabelOverlap:true,minAngle:2,
+    legend:{bottom:0,left:'center',icon:'circle',itemWidth:9,itemHeight:9,itemGap:11,
+      textStyle:{color:'#3a3f47',fontSize:10.5},formatter:n=>SHORT(n)},
+    series:[{type:'pie',radius:['42%','61%'],center:['50%','43%'],avoidLabelOverlap:true,minAngle:2,
       itemStyle:{borderColor:'#ffffff',borderWidth:2},
-      label:{color:AX,fontSize:10.5,lineHeight:14,overflow:'none',
-        formatter:p=>'{n|'+SHORT(p.name)+'}\n{v|'+p.percent+'%}',
-        rich:{n:{color:'#3a3f47',fontSize:10.5,overflow:'none'},v:{color:AX,fontSize:10}}},
-      labelLine:{length:8,length2:8,lineStyle:{color:'#b8bcc2'},smooth:true},
+      label:{color:'#4a4f57',fontSize:10.5,formatter:p=>p.percent>=3?p.percent+'%':''},
+      labelLine:{length:7,length2:7,lineStyle:{color:'#c2c6cc'}},
       data:e.map((x,i)=>{const pct=x[1]/tot*100;return {name:x[0],value:x[1],
-        label:{show:pct>=2.2},labelLine:{show:pct>=2.2},
+        label:{show:pct>=3},labelLine:{show:pct>=3},
         itemStyle:{color:PAL[i%PAL.length]}};})}]});
 }
 function hbar(id,obj,color,top){
