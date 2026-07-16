@@ -12,26 +12,30 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 XLSX = sys.argv[1] if len(sys.argv) > 1 else "/Users/dheeraj.salwadi/Downloads/Arctic Engine _ Data Req.xlsx"
 OUT = os.path.join(HERE, "ae_data.json")
 
-# ---------- title -> tech stack / discipline (fires only on clearly-technical titles) ----------
+# ---------- title -> tech / coding discipline (cleaned + expanded; excludes machine programmers) ----------
 def tech_stack(title):
     t = " " + str(title).lower() + " "
     def has(*k): return any(x in t for x in k)
     def rx(p): return re.search(p, t) is not None
+    # EXCLUDE manufacturing machine programmers (CNC/VMC/PLC) — not software
+    if has('cnc', 'vmc', ' plc', ' vfd', 'machine programm', 'robot programm'): return None
     if rx(r'\bjava\b') and 'javascript' not in t: return "Java"
     if rx(r'\bpython\b'): return "Python"
     if rx(r'\.net\b|\bc#|\bdot ?net\b|asp\.net'): return ".NET / C#"
     if rx(r'\bphp\b'): return "PHP"
-    if has('javascript','typescript','react','angular','vue','node','front end','frontend','front-end','ui developer','web developer','wordpress'): return "Web / Front-end (JS)"
-    if has('android','ios developer','flutter','react native','mobile app','mobile developer'): return "Mobile"
-    if has('data scien','data analyst','data engineer','business intelligence','bi developer','tableau','power bi','big data','hadoop','machine learning','ml engineer'): return "Data & Analytics"
-    if rx(r'\bdba\b|database admin|database develop|sql develop|oracle dba|pl/sql'): return "Database / SQL"
-    if rx(r'\bqa\b|test engineer|software test|automation test|\bsdet\b|\btester\b'): return "QA / Testing"
-    if has('devops','cloud engineer','cloud architect',' aws',' azure','kubernetes','site reliability',' sre '): return "Cloud / DevOps"
-    if has('network engineer','network administrat','ccna','noc engineer','network support'): return "Networking"
-    if has('embedded','firmware','vlsi',' rtl ','verification engineer','asic'): return "Embedded / Hardware"
-    if rx(r'\bsap\b|\berp\b|salesforce|peoplesoft|oracle apps'): return "ERP / SAP / CRM"
-    if has('system administrat','system engineer','desktop support','it support','technical support engineer','it engineer','server administrat','linux administrat','windows administrat','system support','it administrat','hardware and network','hardware & network','computer hardware'): return "Systems / IT Admin"
-    if has('software develop','software engineer','application develop','programmer','full stack','full-stack','backend develop','back end develop','sde','web services','software programmer'): return "Backend / General SW"
+    if has('javascript','typescript','react','angular','vue','node','front end','frontend','front-end','ui developer','ui/ux','web developer','wordpress','web design'): return "Web / Front-end"
+    if has('android','ios developer','flutter','react native','mobile app','mobile developer','kotlin','swift developer'): return "Mobile"
+    if has('data scien','data analyst','data engineer','business intelligence','bi developer','bi analyst','tableau','power bi','big data','hadoop','machine learning','ml engineer','ai engineer','data architect','analytics'): return "Data & AI/ML"
+    if rx(r'\bdba\b|database admin|database develop|sql develop|oracle dba|pl/sql|database engineer'): return "Database / SQL"
+    if rx(r'\bqa\b|test engineer|software test|automation test|\bsdet\b|\btester\b|quality analyst|test analyst|automation engineer'): return "QA / Testing"
+    if has('devops','cloud engineer','cloud architect','cloud administrat',' aws',' azure',' gcp ','kubernetes','docker','site reliability',' sre ','platform engineer','ci/cd'): return "Cloud / DevOps"
+    if has('cyber','information security','infosec','soc analyst','penetration test','security engineer','security analyst'): return "Cybersecurity"
+    if has('network engineer','network administrat','ccna','ccnp','noc engineer','network support','network security','network operat'): return "Networking"
+    if has('embedded','firmware','vlsi',' rtl ','verification engineer','asic','hardware design','pcb','computer hardware','hardware engineer','hardware technician'): return "Embedded / Hardware"
+    if rx(r'\bsap\b|\berp\b|salesforce|peoplesoft|oracle apps|dynamics 365|\bcrm\b|informatica|siebel'): return "ERP / SAP / CRM"
+    if has('software develop','software engineer','application develop','full stack','full-stack','backend','back end','sde','web services','software programmer','software architect','solution architect','technical architect','application programmer','.net developer','dot net developer','scrum master','software consultant','development engineer'): return "Software Development"
+    if has('system administrat','system engineer','desktop support','it support','technical support engineer','it engineer','server administrat','linux administrat','windows administrat','system support','it administrat','it executive','it analyst','it consultant','help desk','helpdesk','service desk','system analyst','it manager','it officer','it head'): return "IT Support & Admin"
+    if has('programmer','developer','technical lead','tech lead'): return "Software Development"
     return None
 
 _TIER_PATS = [

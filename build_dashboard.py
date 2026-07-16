@@ -147,9 +147,9 @@ h1 span{color:var(--mint)}
 
 <div class="sec">3 · Coding &amp; tech</div>
 <div class="grid">
-  <div class="card c12"><h3>Tech stack / discipline distribution <span class="tag">title-derived · full pool</span></h3>
-    <div class="cn">From job title across the full ~1.40M-record pool — 34,949 clearly-technical titles. Explicit-language titles (Java/Python/.NET/PHP) counted directly; other technical titles mapped to the closest discipline.</div>
-    <div id="techStack" class="chart" style="height:360px"></div></div>
+  <div class="card c12"><h3>Coding &amp; tech pool by discipline <span class="tag">title-derived · full pool</span></h3>
+    <div class="cn">The <b id="techTotal"></b> experts in software &amp; IT roles across the full pool, by discipline. Explicit-language titles (Java/Python/.NET/PHP) counted directly; other technical titles mapped to the closest discipline. Manufacturing machine-programmers (CNC/VMC) are excluded.</div>
+    <div id="techStack" class="chart" style="height:400px"></div></div>
   <div class="card c6"><h3>Tech pool by department <span class="tag warn">export sample</span></h3>
     <div class="cn">Software/IT/Hardware/Data/Product departments.</div>
     <div id="techDept" class="chart"></div></div>
@@ -338,6 +338,7 @@ const fcEl=document.createElement('span');fcEl.className='fcount';fcEl.id='filte
  'techDept','techExp','sectors','topEmp','deptRaw'].forEach(mk);
 donut('lang', D.languages);
 hbar('techStack', F.tech_stack || D.tech.by_stack, '#0e7c72', 16);
+(function(){const tt=document.getElementById('techTotal');const n=(F.tech_titled_total)||Object.values(F.tech_stack||{}).reduce((a,b)=>a+b,0);if(tt)tt.textContent=n.toLocaleString();})();
 (function(){
   const secAll=F.employer_sectors||F.company_tiers||D.company_tiers||{};
   const HIDE=['Regional & SME businesses','Unspecified','Other / Unclassified'];
