@@ -164,7 +164,7 @@ h1 span{color:var(--mint)}
     <div class="cn">Filtered pool · subject inferred from specialization. <span class="hint">Tap a domain to see its specializations →</span></div>
     <div id="phdDomain" class="chart" style="height:365px"></div></div>
   <div class="card c7"><h3>PhDs by field</h3>
-    <div class="cn">22,826 PhDs grouped into field families (170+ raw specializations). "Field not stated" = generic "Doctor of Philosophy" entries. <span class="hint">Tap a domain on the left to drill into individual specializations →</span><span class="xf" id="xfPhd"></span></div>
+    <div class="cn">PhDs with an identified field, grouped into families from 170+ raw specializations. <span class="hint">Tap a domain on the left to drill into individual specializations →</span><span class="xf" id="xfPhd"></span></div>
     <div id="phdSpec" class="chart" style="height:400px"></div></div>
 </div>
 
@@ -263,8 +263,9 @@ function drawQual(){
   donut('qual',src);
   chip('xfQual',selVert,()=>{selVert=null;drawQual();});
 }
+function omitNS(o){const r={...o};delete r['Field not stated'];delete r['Subject not specified'];return r;}
 function drawPhdSpec(){
-  const src=(selPhd&&F.phd_specs_by_domain&&F.phd_specs_by_domain[selPhd])?F.phd_specs_by_domain[selPhd]:(F.phd_families||F.phd_top_specializations||D.phd.top_specializations);
+  const src=(selPhd&&F.phd_specs_by_domain&&F.phd_specs_by_domain[selPhd])?F.phd_specs_by_domain[selPhd]:omitNS(F.phd_families||F.phd_top_specializations||D.phd.top_specializations);
   hbar('phdSpec',src,'#8b7ec8',16);
   chip('xfPhd',selPhd,()=>{selPhd=null;drawPhdSpec();});
 }
@@ -300,7 +301,7 @@ function render(langKey){
   const P=curP();
   verticalsChart(P.verticals);
   drawQual();
-  donut('phdDomain',P.phd_by_domain);
+  donut('phdDomain',omitNS(P.phd_by_domain));
   hbar('techDept',P.tech_by_department,'#6ad1fa');
   donut('techExp',orderExp(P.experience_buckets));
   expHist(P.experience_buckets);
