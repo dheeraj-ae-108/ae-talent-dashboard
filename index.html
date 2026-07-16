@@ -14,7 +14,7 @@
 *{box-sizing:border-box}
 body{margin:0;font-family:'Inter',-apple-system,'Segoe UI',system-ui,sans-serif;
   background:var(--bg);color:var(--ink);padding:0 0 60px;min-height:100vh;
-  -webkit-font-smoothing:antialiased}
+  overflow-x:hidden;-webkit-font-smoothing:antialiased}
 .wrap{max-width:1360px;margin:0 auto;padding:0 26px}
 .head{background:var(--header);color:#f4f4f2;padding:20px 0 22px;margin-bottom:26px;
   border-bottom:3px solid var(--accent)}
@@ -35,6 +35,8 @@ h1 span{color:var(--mint)}
   background:var(--panel);border:1px solid var(--panel-brd);border-radius:14px;padding:12px 16px;
   box-shadow:0 1px 3px rgba(21,23,27,.05)}
 .filterbar .flab{font-size:12px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.6px;margin-right:4px}
+.fcount{margin-left:auto;font-size:13px;color:var(--ink-dim)}
+.fcount b{color:var(--accent);font-weight:700}
 .pill{cursor:pointer;font-size:12.5px;padding:6px 14px;border-radius:20px;border:1px solid var(--panel-brd);
   background:var(--bg-soft);color:var(--ink-dim);transition:.15s}
 .pill:hover{border-color:var(--accent);color:var(--accent)}
@@ -292,9 +294,10 @@ function render(langKey){
   hbar('techDept',P.tech_by_department,'#6ad1fa');
   donut('techExp',orderExp(P.experience_buckets));
   expHist(P.experience_buckets);
-  document.getElementById('kpi-n').textContent=P.n.toLocaleString();
-  document.getElementById('kpi-phd').textContent=fmt(P.phd_count);
-  document.getElementById('kpi-tech').textContent=fmt(P.tech_count);
+  const fc=document.getElementById('filterCount');
+  if(fc) fc.innerHTML = (active==='All')
+    ? `Showing all <b>${P.n.toLocaleString()}</b> experts`
+    : `Showing <b>${P.n.toLocaleString()}</b> ${active} speakers`;
 }
 function fmt(n){return n>=1000?(n/1000).toFixed(n>=100000?0:1)+'K':''+n;}
 
@@ -303,18 +306,15 @@ const m=D.meta;
 const fullRows = (D.full && D.full.rows) ? D.full.rows : m.source_rows;
 const fullPhd = (D.full && D.full.phd_total) ? D.full.phd_total : m.phd_count;
 document.getElementById('banner').innerHTML =
-  `<b>Domain Expert</b> = 10+ years of experience <b>OR</b> a PhD.&nbsp; This network holds `+
-  `<span class="big">${fullRows.toLocaleString()}</span> expert records · `+
-  `<span class="big">${m.unique_candidates.toLocaleString()}</span> unique people · `+
-  `<span class="big">${fullPhd.toLocaleString()}</span> PhDs — and it keeps growing (active across 40k+ colleges & 300k+ companies).`;
-document.getElementById('subline').innerHTML =
-  `Full pool ≈ <b style="color:#f4f4f2">${fullRows.toLocaleString()}</b> records · `+
-  `${m.unique_candidates.toLocaleString()} unique candidates · generated ${m.generated}`;
+  `<b>Domain Expert</b> = 10+ years of hands-on experience <b>or</b> a PhD.&nbsp; A network of `+
+  `<span class="big">${m.unique_candidates.toLocaleString()}</span> vetted experts and `+
+  `<span class="big">${fullPhd.toLocaleString()}</span> PhDs — active across 40,000+ colleges and 300,000+ companies, and growing every week.`;
+document.getElementById('subline').textContent = 'Domain-expert talent network for frontier AI';
 document.getElementById('kpis').innerHTML = `
-  <div class="kpi"><div class="lab">Domain-expert records</div><div class="val">${fullRows.toLocaleString()}</div><div class="note" style="color:var(--ink-dim)">${m.unique_candidates.toLocaleString()} unique people</div></div>
-  <div class="kpi"><div class="lab">Median / Avg experience</div><div class="val">${m.median_yoe} / ${m.avg_yoe}</div><div class="note" style="color:var(--ink-dim)">years, person-level</div></div>
-  <div class="kpi"><div class="lab">PhD network</div><div class="val">${fullPhd.toLocaleString()}</div><div class="note" style="color:var(--ink-dim)">full pool · ${m.languages_covered} languages</div></div>
-  <div class="kpi"><div class="lab">Candidates (filtered)</div><div class="val" id="kpi-n"></div><div class="note" style="color:var(--ink-dim)">by language · <span id="kpi-phd"></span> PhD · <span id="kpi-tech"></span> tech</div></div>`;
+  <div class="kpi"><div class="lab">Domain experts</div><div class="val">${m.unique_candidates.toLocaleString()}</div><div class="note">10+ yrs experience or PhD</div></div>
+  <div class="kpi"><div class="lab">Avg experience</div><div class="val">${(Math.round(m.avg_yoe*10)/10)} yrs</div><div class="note">${m.median_yoe} yrs median</div></div>
+  <div class="kpi"><div class="lab">PhD network</div><div class="val">${fullPhd.toLocaleString()}</div><div class="note">across 40k+ colleges</div></div>
+  <div class="kpi"><div class="lab">Languages</div><div class="val">${m.languages_covered}</div><div class="note">Indian languages covered</div></div>`;
 
 // ---- language filter pills ----
 const fb=document.getElementById('filterbar');
@@ -324,6 +324,7 @@ langs.forEach(l=>{
   b.onclick=()=>setLang(l);
   fb.appendChild(b);
 });
+const fcEl=document.createElement('span');fcEl.className='fcount';fcEl.id='filterCount';fb.appendChild(fcEl);
 
 // init
 ['verticals','qual','exphist','lang','phdDomain','phdSpec','techStack',
