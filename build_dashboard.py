@@ -73,7 +73,27 @@ h1 span{color:var(--mint)}
   font-size:12.5px;color:var(--ink-dim);line-height:1.7}
 .notes b{color:var(--ink)}
 .notes ul{margin:8px 0 0;padding-left:20px}
-@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.c4,.c5,.c6,.c7,.c8{grid-column:span 12}}
+@media screen and (max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.c4,.c5,.c6,.c7,.c8{grid-column:span 12}}
+
+/* ---------- PRINT / PDF: one section per page ---------- */
+@media print{
+  @page{size:A4 landscape;margin:9mm}
+  *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
+  body{background:#fff;padding:0}
+  .wrap{max-width:none;padding:0 4mm}
+  .head{margin-bottom:10px;padding:12px 0 14px;break-after:avoid}
+  .head .wrap{padding:0 4mm}
+  .kpis{margin-bottom:10px;gap:10px;break-inside:avoid}
+  .kpi{padding:10px 12px}
+  .kpi .val{font-size:26px}
+  .banner{margin-bottom:8px;padding:10px 16px;font-size:13px;break-inside:avoid}
+  .filterbar,.hint,.xf,.fcount{display:none !important}   /* interactive-only */
+  .sec{break-before:page;break-after:avoid;margin:0 0 6px;padding-top:0;border-top:none}
+  .sec.first{break-before:auto}
+  .grid{gap:10px}
+  .card{break-inside:avoid;box-shadow:none;border-color:#dcdbd6}
+  .notes{break-inside:avoid}
+}
 </style>
 </head>
 <body>
@@ -112,7 +132,7 @@ h1 span{color:var(--mint)}
   <span class="flab">Language filter</span>
 </div>
 
-<div class="sec">1 · Years of experience</div>
+<div class="sec first">1 · Years of experience</div>
 <div class="grid">
   <div class="card c12"><h3>Experience distribution</h3>
     <div class="cn">Candidates by years of professional experience. Domain-expert floor is 8+ years.</div>
@@ -355,6 +375,12 @@ charts.topEmp.on('click',p=>{if(p.name&&F.prestige_groups&&(p.name in F.prestige
 charts.lang.on('click',p=>{if(p.data){setLang(active===p.name?'All':p.name);}});
 render('All');
 window.addEventListener('resize',()=>Object.values(charts).forEach(c=>c.resize()));
+// re-render charts at print width so PDF/Ctrl+P output isn't scaled.
+// animation MUST be off first, else the print snapshot catches bars mid-grow (at zero).
+function _printPrep(){Object.values(charts).forEach(c=>{try{c.setOption({animation:false});c.resize();}catch(e){}});}
+window.addEventListener('beforeprint',_printPrep);
+if(window.matchMedia){const _mq=window.matchMedia('print');
+  if(_mq.addEventListener)_mq.addEventListener('change',e=>{if(e.matches)_printPrep();});}
 </script>
 </div>
 </body>
