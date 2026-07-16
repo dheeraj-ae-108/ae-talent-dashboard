@@ -130,12 +130,12 @@ h1 span{color:var(--mint)}
   <div class="card c6"><h3>Top departments</h3>
     <div class="cn">Most common departments across the pool.</div>
     <div id="deptRaw" class="chart"></div></div>
-  <div class="card c6"><h3>Multi-lingual pool <span class="tag">global</span></h3>
+  <div class="card c6"><h3>Multi-lingual pool</h3>
     <div class="cn">Language mentions across candidates. <span class="hint">Tap a language to filter the whole dashboard →</span></div>
     <div id="lang" class="chart" style="height:365px"></div></div>
 </div>
 
-<div class="sec">Employer landscape <span class="tag">derived · full pool</span></div>
+<div class="sec">Employer landscape</div>
 <div class="grid">
   <div class="card c6"><h3>Employer sectors <span id="secScope" class="tag">industry</span></h3>
     <div class="cn">Enterprise employers by industry.<span id="smeNote"></span> <span class="hint">Tap a sector to see its companies →</span><span class="xf" id="xfSec"></span></div>
@@ -147,13 +147,13 @@ h1 span{color:var(--mint)}
 
 <div class="sec">3 · Coding &amp; tech</div>
 <div class="grid">
-  <div class="card c12"><h3>Coding &amp; tech pool by discipline <span class="tag">title-derived · full pool</span></h3>
+  <div class="card c12"><h3>Coding &amp; tech pool by discipline</h3>
     <div class="cn">The <b id="techTotal"></b> experts in software &amp; IT roles across the full pool, by discipline. Explicit-language titles (Java/Python/.NET/PHP) counted directly; other technical titles mapped to the closest discipline. Manufacturing machine-programmers (CNC/VMC) are excluded.</div>
     <div id="techStack" class="chart" style="height:400px"></div></div>
-  <div class="card c6"><h3>Tech pool by department <span class="tag warn">export sample</span></h3>
+  <div class="card c6"><h3>Tech pool by department</h3>
     <div class="cn">Software/IT/Hardware/Data/Product departments.</div>
     <div id="techDept" class="chart"></div></div>
-  <div class="card c6"><h3>Tech pool by experience band <span class="tag warn">export sample</span></h3>
+  <div class="card c6"><h3>Tech pool by experience band</h3>
     <div class="cn">Filtered tech candidates.</div>
     <div id="techExp" class="chart" style="height:365px"></div></div>
 </div>
@@ -163,7 +163,7 @@ h1 span{color:var(--mint)}
   <div class="card c5"><h3>PhDs by domain</h3>
     <div class="cn">Filtered pool · subject inferred from specialization. <span class="hint">Tap a domain to see its specializations →</span></div>
     <div id="phdDomain" class="chart" style="height:365px"></div></div>
-  <div class="card c7"><h3>PhDs by field <span class="tag">full pool</span></h3>
+  <div class="card c7"><h3>PhDs by field</h3>
     <div class="cn">22,826 PhDs grouped into field families (170+ raw specializations). "Subject not specified" = generic "Doctor of Philosophy" entries. <span class="hint">Tap a domain on the left to drill into individual specializations →</span><span class="xf" id="xfPhd"></span></div>
     <div id="phdSpec" class="chart" style="height:400px"></div></div>
 </div>
