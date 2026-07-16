@@ -110,12 +110,12 @@ def phd_domain(s):
     def has(*ks): return any(k in s for k in ks)
     if has("law","legal","llb","llm","jurisprud"): return "Law"
     if has("medic","clinical","surgery","nursing","pharma","dental","physiother","anatomy","physiology","health","nutrition","ayurved","optometr"): return "Medicine & Health"
-    if has("engineer","technology","computer","electronic","mechanical","civil","electrical","instrumentation","aeronaut","automobile","information tech","software","robotic"): return "Engineering"
+    if has("engineer","technology","computer","electronic","mechanical","civil","electrical","instrumentation","aeronaut","automobile","information tech","software","robotic","cloud","computational","fluid dynamic"): return "Engineering"
     if has("design","architect","fine art","fashion","interior"): return "Design"
     if has("physic","chemis","biolog","biotech","zoolog","botan","mathematic","science","agricultur","agronom","microbio","environ","geolog","statistic","genetic","food","dairy","forestry","veterinar","nano","material","biochem","horticultur","bioinformatic","entomolog","plant patholog","fishery","soil"): return "Sciences"
-    if has("commerce","econ","finance","account","market","business","management","banking","quantitative","human resource"): return "Finance & Economics"
-    if has("histor","philosoph","art","english","hindi","sanskrit","literatur","sociolog","politic","geograph","psycholog","education","language","linguist","music","religion","theolog","cultur","humanit","tamil","telugu","kannada","marathi","urdu","bengali","gujarati","punjabi","odia","assamese","persian","women","gender","journalis","media","mass comm","social work","public admin","yoga","physical educat","library","rural","planning","home scien","drama","acting","theatre","film","dance","jyotish","astrolog","vedic"): return "Humanities & Social Sciences"
-    return "Subject not specified"
+    if has("commerce","econ","finance","account","market","business","management","banking","quantitative","human resource","hrm"): return "Finance & Economics"
+    if has("histor","philosoph","art","english","hindi","sanskrit","literatur","sociolog","politic","geograph","psycholog","education","language","linguist","music","religion","theolog","cultur","humanit","tamil","telugu","kannada","marathi","urdu","bengali","gujarati","punjabi","odia","assamese","persian","women","gender","anthropolog","human development","journalis","media","mass comm","social work","public admin","yoga","physical educat","library","rural","planning","home scien","drama","acting","theatre","film","dance","jyotish","astrolog","vedic"): return "Humanities & Social Sciences"
+    return "Field not stated"
 
 print("reading xlsx…")
 jt = pd.read_excel(XLSX, sheet_name="Job Title");        jt.columns = ["v", "n"]
@@ -170,11 +170,11 @@ _PHD_UNSPEC = ("", "nan", "philosophy", "doctor of philosophy", "phd", "ph.d", "
 def phd_spec_display(s):
     return "Other / Unspecified" if str(s).strip().lower() in _PHD_UNSPEC else str(s).strip()
 def phd_domain2(s):
-    return "Subject not specified" if str(s).strip().lower() in _PHD_UNSPEC else phd_domain(s)
+    return "Field not stated" if str(s).strip().lower() in _PHD_UNSPEC else phd_domain(s)
 def phd_family(s):
     t = str(s).lower().strip()
     def has(*k): return any(x in t for x in k)
-    if t in _PHD_UNSPEC: return "Subject not specified"
+    if t in _PHD_UNSPEC: return "Field not stated"
     if has("computer","information tech","data scien","software","informatics","artificial intel"): return "Computer Science & IT"
     if has("pharma","medic","nursing","clinical","physiology","anatomy","dental","surgery","physiother","ayurved","health","nutrition"): return "Medicine, Pharmacy & Health"
     if has("engineering","engineer","technology","instrumentation","aeronaut","automobile","mechatron","polymer"): return "Engineering & Technology"

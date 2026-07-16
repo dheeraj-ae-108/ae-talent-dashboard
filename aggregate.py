@@ -44,12 +44,12 @@ def phd_domain(s):
     def has(*ks): return any(k in s for k in ks)
     if has("law","legal","llb","llm","jurisprud"): return "Law"
     if has("medic","clinical","surgery","nursing","pharma","dental","physiother","anatomy","physiology","health","nutrition","ayurved","optometr"): return "Medicine & Health"
-    if has("engineer","technology","computer","electronic","mechanical","civil","electrical","instrumentation","aeronaut","automobile","information tech","software","robotic"): return "Engineering"
+    if has("engineer","technology","computer","electronic","mechanical","civil","electrical","instrumentation","aeronaut","automobile","information tech","software","robotic","cloud","computational","fluid dynamic"): return "Engineering"
     if has("design","architect","fine art","fashion","interior"): return "Design"
     if has("physic","chemis","biolog","biotech","zoolog","botan","mathematic","science","agricultur","agronom","microbio","environ","geolog","statistic","genetic","food","dairy","forestry","veterinar","nano","material","biochem","horticultur","bioinformatic","entomolog","plant patholog","fishery","soil"): return "Sciences"
-    if has("commerce","econ","finance","account","market","business","management","banking","quantitative","human resource"): return "Finance & Economics"
-    if has("histor","philosoph","art","english","hindi","sanskrit","literatur","sociolog","politic","geograph","psycholog","education","language","linguist","music","religion","theolog","cultur","humanit","tamil","telugu","kannada","marathi","urdu","bengali","gujarati","punjabi","odia","assamese","persian","women","gender","journalis","media","mass comm","social work","public admin","yoga","physical educat","library","rural","planning","home scien","drama","acting","theatre","film","dance","jyotish","astrolog","vedic"): return "Humanities & Social Sciences"
-    return "Subject not specified"
+    if has("commerce","econ","finance","account","market","business","management","banking","quantitative","human resource","hrm"): return "Finance & Economics"
+    if has("histor","philosoph","art","english","hindi","sanskrit","literatur","sociolog","politic","geograph","psycholog","education","language","linguist","music","religion","theolog","cultur","humanit","tamil","telugu","kannada","marathi","urdu","bengali","gujarati","punjabi","odia","assamese","persian","women","gender","anthropolog","human development","journalis","media","mass comm","social work","public admin","yoga","physical educat","library","rural","planning","home scien","drama","acting","theatre","film","dance","jyotish","astrolog","vedic"): return "Humanities & Social Sciences"
+    return "Field not stated"
 
 # ---------- domain vertical mapping (from department) ----------
 def vertical(dep):
@@ -188,7 +188,7 @@ _PHD_UNSPEC = ("", "philosophy", "doctor of philosophy", "phd", "ph.d", "ph.d.",
 def phd_spec_display(s):
     return "Other / Unspecified" if str(s).strip().lower() in _PHD_UNSPEC else str(s).strip()
 def phd_domain2(s):
-    return "Subject not specified" if str(s).strip().lower() in _PHD_UNSPEC else phd_domain(s)
+    return "Field not stated" if str(s).strip().lower() in _PHD_UNSPEC else phd_domain(s)
 phd_rows = df[df["qual"]=="PhD"].copy()
 phd_users = phd_rows.drop_duplicates("user_id").copy()
 phd_users["pdomain"] = phd_users["specialization_title"].map(phd_domain2)

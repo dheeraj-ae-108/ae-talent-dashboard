@@ -164,7 +164,7 @@ h1 span{color:var(--mint)}
     <div class="cn">Filtered pool · subject inferred from specialization. <span class="hint">Tap a domain to see its specializations →</span></div>
     <div id="phdDomain" class="chart" style="height:365px"></div></div>
   <div class="card c7"><h3>PhDs by field</h3>
-    <div class="cn">22,826 PhDs grouped into field families (170+ raw specializations). "Subject not specified" = generic "Doctor of Philosophy" entries. <span class="hint">Tap a domain on the left to drill into individual specializations →</span><span class="xf" id="xfPhd"></span></div>
+    <div class="cn">22,826 PhDs grouped into field families (170+ raw specializations). "Field not stated" = generic "Doctor of Philosophy" entries. <span class="hint">Tap a domain on the left to drill into individual specializations →</span><span class="xf" id="xfPhd"></span></div>
     <div id="phdSpec" class="chart" style="height:400px"></div></div>
 </div>
 
@@ -178,7 +178,7 @@ function mk(id){const c=echarts.init(document.getElementById(id),null,{renderer:
 const baseTip={backgroundColor:'#15171b',borderColor:'#2a2d33',borderWidth:1,textStyle:{color:'#f4f4f2'}};
 const SHORTMAP={'Undergraduate':'Undergrad','Diploma / Certificate':'Diploma','PG Diploma':'PG Dip',
   'Humanities & Social Sciences':'Humanities','Finance & Economics':'Finance/Econ','Medicine & Health':'Medicine',
-  'Subject not specified':'Not specified','Other / Unspecified':'Other','Other / Unclassified':'Other','FAANG / Global Big-Tech':'FAANG / Big-Tech',
+  'Field not stated':'Not stated','Other / Unspecified':'Other','Other / Unclassified':'Other','FAANG / Global Big-Tech':'FAANG / Big-Tech',
   'Indian IT / Global Consulting':'Indian IT','Unicorn / Funded Startup':'Unicorn','Bank / BFSI / Large Enterprise':'BFSI / Enterprise'};
 function SHORT(n){return SHORTMAP[n]||n;}
 function sortObj(o){return Object.entries(o).sort((a,b)=>b[1]-a[1]);}
@@ -348,7 +348,7 @@ drawSectors();
 drawPrestige();
 // ---- cross-filter + drill click handlers ----
 charts.verticals.on('click',p=>{if(p.componentType==='series'&&p.seriesType==='bar'){selVert=(selVert===p.name)?null:p.name;drawQual();}});
-charts.phdDomain.on('click',p=>{if(p.data){selPhd=(selPhd===p.name)?null:p.name;drawPhdSpec();}});
+charts.phdDomain.on('click',p=>{if(p.data&&p.name!=='Field not stated'){selPhd=(selPhd===p.name)?null:p.name;drawPhdSpec();}});
 charts.sectors.on('click',p=>{if(p.name&&F.employer_sectors&&(p.name in F.employer_sectors)){selSector=(selSector===p.name)?null:p.name;drawSectors();}});
 charts.topEmp.on('click',p=>{if(p.name&&F.prestige_groups&&(p.name in F.prestige_groups)){selPrestige=(selPrestige===p.name)?null:p.name;drawPrestige();}});
 charts.lang.on('click',p=>{if(p.data){setLang(active===p.name?'All':p.name);}});
