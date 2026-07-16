@@ -47,6 +47,31 @@ def company_tier(org):
         if re.search(pat, o): return name
     return "Other / Unclassified"
 
+# ---------- employer SECTOR (industry) classifier — richer than tier, for the client story ----------
+_SECTOR_PATS = [
+    ("Global Big-Tech", r'\bgoogle\b|\bamazon\b|\bmeta\b|facebook|\bapple\b|netflix|micro ?soft|nvidia|\bintel\b|qualcomm|\bcisco\b|\badobe\b|salesforce|\buber\b|linkedin|\boracle\b|\bdell\b|\bsap\b|\bpaypal\b|\bvmware\b|goldman sachs|\bjp ?morgan\b|morgan stanley|\bsamsung\b|\blg electronics'),
+    ("IT Services & Consulting", r'tata consult|\btcs\b|infosys|wipro|\bhcl\b|cognizant|capgemini|accenture|tech mahindra|\bibm\b|mindtree|mphasis|ltimindtree|\blti\b|\bdxc\b|genpact|deloitte|\bpwc\b|\bkpmg\b|ernst|\bey\b|hexaware|zensar|birlasoft|coforge|persistent|teleperformance|concentrix|\bwns\b|quess|randstad|sutherland|firstsource|\bhgs\b|startek|tech ?nolog|software|infotech|\bit solution|\bit service|\bbpo\b|\bkpo\b|datamatics|\bntt\b|\batos\b|virtusa|cybage|\bg4s\b'),
+    ("Banking, Finance & Insurance", r'\bbank\b|\bhdfc\b|\bicici\b|axis|\bsbi\b|kotak|\bidfc\b|indusind|bandhan|finance|financial|\bfinserv|insurance|\blic\b|life corp|\bnbfc\b|\bcapital\b|muthoot|shriram|cholamandalam|bajaj fin|\bhdb\b|small finance|\bdbs\b|\bhsbc\b|\bciti\b|standard chartered|american express|angel|motilal|sharekhan|mutual fund|lombard'),
+    ("Manufacturing & Industrial", r'industries|manufactur|\bsteel\b|cement|\bmotors\b|automot|automobile|\bauto\b|\btyres?\b|chemical|textile|\bmills\b|electric|electronic|machinery|fabricat|foundry|\bjsw\b|tata motors|maruti|bajaj auto|bosch|\babb\b|siemens|schneider|\bbhel\b|\bsail\b|forbes|precision|components|paints'),
+    ("Healthcare & Pharma", r'hospital|\bclinic|healthcare|health care|\bmedical\b|diagnostic|\bpharma|life science|\blabs?\b|apollo|fortis|max health|manipal|\bcipla\b|sun pharma|\bdr\.? reddy|lupin|aurobindo|biocon|\bnursing\b|wellness'),
+    ("Retail, FMCG & Consumer", r'\bretail\b|\bstores?\b|\bmart\b|\bbazaar\b|supermarket|hypermarket|\bfashion\b|apparel|\bfmcg\b|unilever|\bitc\b|nestle|\bfoods?\b|beverage|\bconsumer\b|dabur|marico|britannia|patanjali|\bdmart\b|\bbig ?basket|reliance retail|reliance digital|vishal mega|trends|lifestyle|jubilant food|eureka'),
+    ("Telecom & Media", r'telecom|\bairtel\b|\bjio\b|vodafone|\bvi\b|\bbsnl\b|\bmtnl\b|communications?|\bmedia\b|broadcast|entertainment|\bzee\b|network18'),
+    ("Government, PSU & Defense", r'indian army|air force|\bnavy\b|\barmy\b|\bgovernment\b|ministr|\brailway|municipal|\bpolice\b|\bisro\b|\bdrdo\b|\bongc\b|\bntpc\b|\bgail\b|coal india|public sector|\bpsu\b|\bcrpf\b|\bbsf\b|nagar nigam|panchayat|\bpwd\b'),
+    ("Education & Research", r'\bschool\b|schools|\bcollege\b|universit|institut|academy|vidyalaya|\beducation\b|\bkendriya\b|\bcbse\b|coaching|gurukul|research'),
+    ("New-age / Startups", r'flipkart|\bpaytm\b|\bswiggy\b|zomato|\bola\b|\boyo\b|byju|\bphonepe\b|razorpay|\bmeesho\b|\bcred\b|\bzoho\b|freshworks|\bnykaa\b|unacademy|dream11|\bgroww\b|zerodha|policybazaar|lenskart|delhivery|\budaan\b|\bcars24|urban ?company|\bspinny|\bzepto|pharmeasy|just ?dial|\bnykaa'),
+    ("Hospitality, Travel & Logistics", r'\bhotel\b|resort|restaurant|hospitality|\btravels?\b|\btours?\b|airlines?|indigo|spicejet|\bcargo\b|logistic|\btransport|courier|\bexpress\b|\bdtdc\b|blue dart|shipping|freight|supply chain'),
+    ("Energy, Infra & Real Estate", r'\bpower\b|\benergy\b|\boil\b|\bgas\b|petroleum|\bsolar\b|renewable|infrastructure|construction|\bbuilders?\b|\brealty\b|\bestate\b|developers?|\bhousing\b|\binfra\b|reliance industries|larsen|\bl&t\b'),
+    ("Self-employed / Freelance", r'self ?employ|\bself\b|freelanc|free lancer|own business|proprietor|home business'),
+]
+def sector(org):
+    s = str(org).lower().strip()
+    if s in ("", "na", "n/a", "none", "nan", "private", "private limited", "any company", "company", "xyz", "abc"):
+        return "Unspecified"
+    for name, pat in _SECTOR_PATS:
+        if re.search(pat, s):
+            return name
+    return "Regional & SME businesses"
+
 def qual_bucket(c):
     c = str(c).lower()
     if "phd" in c or "doctor" in c or "d.phil" in c: return "PhD"
@@ -94,6 +119,13 @@ employers_by_tier = {}
 for tier, g in org.groupby("tier"):
     employers_by_tier[tier] = g.sort_values("n", ascending=False).head(15).set_index("v")["n"].astype(int).to_dict()
 
+# employer SECTORS (industry breakdown, replaces the 90%-Other tier donut)
+org["sector"] = org["v"].map(sector)
+employer_sectors = org.groupby("sector")["n"].sum().sort_values(ascending=False).astype(int).to_dict()
+employers_by_sector = {}
+for sec, g in org.groupby("sector"):
+    employers_by_sector[sec] = g.sort_values("n", ascending=False).head(15).set_index("v")["n"].astype(int).to_dict()
+
 # sub-departments (full pool, top 15, skip blank)
 subdepts_full = sub.sort_values("n", ascending=False).head(15).set_index("v")["n"].astype(int).to_dict()
 
@@ -131,6 +163,8 @@ data["full"] = {
     "company_tiers": company_tiers_full,
     "top_employers": top_employers_full,
     "employers_by_tier": employers_by_tier,
+    "employer_sectors": employer_sectors,
+    "employers_by_sector": employers_by_sector,
     "subdepartments": subdepts_full,
     "qualifications": qualifications_full,
     "top_specializations": top_specializations_full,

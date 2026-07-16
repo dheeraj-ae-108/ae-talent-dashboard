@@ -133,14 +133,14 @@ h1 span{color:var(--mint)}
     <div id="lang" class="chart" style="height:365px"></div></div>
 </div>
 
-<div class="sec">Company landscape <span class="tag">derived · full pool</span></div>
+<div class="sec">Employer landscape <span class="tag">derived · full pool</span></div>
 <div class="grid">
-  <div class="card c5"><h3>Whole pool by company tier</h3>
-    <div class="cn">Employer name matched to tier across the full ~1.40M-record pool. <span class="hint">Tap a tier to see its top employers →</span></div>
-    <div id="companyTiers" class="chart" style="height:365px"></div></div>
-  <div class="card c7"><h3>Top employers in premium tiers</h3>
-    <div class="cn">Most common FAANG / Indian-IT / unicorn employers (full pool).<span class="xf" id="xfEmp"></span></div>
-    <div id="topEmp" class="chart"></div></div>
+  <div class="card c6"><h3>Employer sectors — where our experts work</h3>
+    <div class="cn">Enterprise employers classified into industry (full ~1.40M-record pool).<span id="smeNote"></span> <span class="hint">Tap a sector to see its top employers →</span></div>
+    <div id="sectors" class="chart" style="height:430px"></div></div>
+  <div class="card c6"><h3>Top employers <span id="empScope" class="tag">premium tiers</span></h3>
+    <div class="cn">Marquee employers across the pool.<span class="xf" id="xfEmp"></span></div>
+    <div id="topEmp" class="chart" style="height:430px"></div></div>
 </div>
 
 <div class="sec">3 · Coding &amp; tech</div>
@@ -171,7 +171,7 @@ h1 span{color:var(--mint)}
   <ul>
     <li><b>Two data sources.</b> Panels tagged <span class="tag">full pool</span> use the authoritative distinct-count sheets (<i>Arctic Engine · Data Req</i>) covering the full <b>1,402,050-record</b> pool. Panels tagged <span class="tag warn">export sample</span> use the person-level CSV export, which is truncated at 1,048,575 rows (916,607 unique candidates) — used only where person-level joins or the language filter are needed.</li>
     <li><b>Tech stack is title-derived.</b> No language column exists, so stack/discipline is inferred from job title across the full pool — explicit-language titles (Java/Python/.NET/PHP) counted directly; other technical titles mapped to the closest discipline. Only ~35K titles are unambiguously technical, so language-level counts are directional, not self-reported.</li>
-    <li><b>Company tier is derived from the employer name.</b> 97% of records name an employer; we keyword-match to FAANG/global big-tech, Indian IT/consulting, unicorn/startup, and BFSI/enterprise. Unmatched names fall to "Other" (self-employed, govt, SMEs).</li>
+    <li><b>Employer sectors are derived from the employer name.</b> 97% of records name an employer; we classify each into an industry sector (IT services, BFSI, manufacturing, healthcare, education, telecom, govt/defense, etc.). Names that don't map to a sector — genuinely small/regional businesses and self-employed — are grouped as "Regional & SME businesses" (~55%), reflecting the pool's deep grassroots reach alongside enterprise coverage.</li>
     <li><b>Domain remapping.</b> Candidates with a blank department (~30% of the raw export) are reassigned to a domain from their job title (best-effort). This cut "Unclassified" from ~30% to ~12%; the rest are genuinely generic titles (e.g. "Manager", "Director") or have no title.</li>
     <li><b>PhD data cleaned.</b> "Doctor of Philosophy" degree-name entries (job titles were science/biology teachers, not philosophers) are folded into <i>Other fields</i> rather than counted as Philosophy. "Pharmacy" includes Pharm.D (Doctor of Pharmacy) holders. Getting <b>new PhDs is low-friction</b> — the network already spans 40k+ colleges.</li>
     <li><b>No active-status field</b> exists, so that cut is omitted. <b>Languages:</b> only 10 regional languages are captured; Hindi/Urdu/Punjabi are absent.</li>
@@ -280,9 +280,10 @@ function drawPhdSpec(){
   chip('xfPhd',selPhd,()=>{selPhd=null;drawPhdSpec();});
 }
 function drawTopEmp(){
-  const src=(selTier&&F.employers_by_tier&&F.employers_by_tier[selTier])?F.employers_by_tier[selTier]:(F.top_employers||D.top_employers);
-  hbar('topEmp',src,'#12a37a',14);
-  chip('xfEmp',selTier?SHORT(selTier):null,()=>{selTier=null;drawTopEmp();});
+  const src=(selTier&&F.employers_by_sector&&F.employers_by_sector[selTier])?F.employers_by_sector[selTier]:(F.top_employers||D.top_employers);
+  hbar('topEmp',src,'#12a37a',15);
+  const es=document.getElementById('empScope'); if(es) es.textContent=selTier||'premium tiers';
+  chip('xfEmp',selTier||null,()=>{selTier=null;drawTopEmp();});
 }
 function setLang(l){
   active=l;
@@ -333,17 +334,25 @@ langs.forEach(l=>{
 
 // init
 ['verticals','qual','exphist','lang','phdDomain','phdSpec','techStack',
- 'techDept','techExp','companyTiers','topEmp','deptRaw'].forEach(mk);
+ 'techDept','techExp','sectors','topEmp','deptRaw'].forEach(mk);
 donut('lang', D.languages);
 hbar('techStack', F.tech_stack || D.tech.by_stack, '#0e7c72', 16);
-donut('companyTiers', F.company_tiers || D.company_tiers);
+(function(){
+  const secAll=F.employer_sectors||F.company_tiers||D.company_tiers||{};
+  const HIDE=['Regional & SME businesses','Unspecified','Other / Unclassified'];
+  const secBar=Object.fromEntries(Object.entries(secAll).filter(([k])=>!HIDE.includes(k)));
+  hbar('sectors', secBar, '#0e7c72', 14);
+  const sme=secAll['Regional & SME businesses']||0;
+  const el=document.getElementById('smeNote');
+  if(el&&sme) el.innerHTML=' Plus <b style="color:#3a3f47">'+sme.toLocaleString()+'</b> experts at regional &amp; SME businesses — deep grassroots reach.';
+})();
 hbar('deptRaw', D.departments_top, '#2fb89a', 15);
 drawPhdSpec();
 drawTopEmp();
 // ---- cross-filter click handlers (tap a source category → partner chart updates) ----
 charts.verticals.on('click',p=>{if(p.componentType==='series'&&p.seriesType==='bar'){selVert=(selVert===p.name)?null:p.name;drawQual();}});
 charts.phdDomain.on('click',p=>{if(p.data){selPhd=(selPhd===p.name)?null:p.name;drawPhdSpec();}});
-charts.companyTiers.on('click',p=>{if(p.data){selTier=(selTier===p.name)?null:p.name;drawTopEmp();}});
+charts.sectors.on('click',p=>{if(p.name){selTier=(selTier===p.name)?null:p.name;drawTopEmp();}});
 charts.lang.on('click',p=>{if(p.data){setLang(active===p.name?'All':p.name);}});
 render('All');
 window.addEventListener('resize',()=>Object.values(charts).forEach(c=>c.resize()));
