@@ -63,10 +63,19 @@ h1 span{color:var(--mint)}
 .xf.on{display:inline-block}
 .xf b{font-weight:700}
 .hint{color:#9aa0a8;font-style:italic}
-.banner{background:linear-gradient(100deg,#0e7c72 0%,#0a5d55 100%);color:#eafaf6;border-radius:14px;
-  padding:14px 20px;margin-bottom:22px;font-size:15px;box-shadow:0 3px 14px rgba(14,124,114,.28)}
-.banner b{color:#fff;font-weight:700}
-.banner .big{color:var(--mint);font-weight:700}
+.hero{margin:0 0 24px}
+.hero .kicker{font-size:12px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;font-weight:700;margin-bottom:10px}
+.hero h2{font-size:29px;font-weight:800;color:var(--ink);margin:0 0 10px;line-height:1.18;letter-spacing:-.3px}
+.hero .sub{font-size:14.5px;color:var(--ink-dim);max-width:820px;line-height:1.55;margin:0 0 20px}
+.herobox{background:#e9f4f0;border-radius:16px;padding:22px 28px;text-align:center}
+.herobox h3{color:var(--accent);font-size:19px;margin:0 0 8px;font-weight:800;letter-spacing:-.2px}
+.herobox p{color:#3a5a54;font-size:13.5px;margin:0 0 16px;max-width:640px;margin-left:auto;margin-right:auto;line-height:1.5}
+.herostats{display:flex;justify-content:center;gap:40px;margin-bottom:18px;flex-wrap:wrap}
+.herostats .stat{white-space:nowrap}
+.herostats .n{font-size:22px;font-weight:800;color:var(--accent)}
+.herostats .l{font-size:12.5px;color:#3a5a54;margin-left:6px}
+.herocta{display:inline-block;background:#0a5d55;color:#fff;font-weight:700;font-size:14px;
+  padding:12px 28px;border-radius:999px;text-decoration:none;box-shadow:0 3px 10px rgba(10,93,85,.3)}
 .sec{margin:30px 0 4px;font-size:12.5px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;
   border-top:1px solid var(--panel-brd);padding-top:18px;font-weight:600}
 .notes{margin-top:30px;background:var(--bg-soft);border:1px solid var(--panel-brd);border-radius:14px;padding:18px 22px;
@@ -86,7 +95,15 @@ h1 span{color:var(--mint)}
   .kpis{margin-bottom:10px;gap:10px;break-inside:avoid}
   .kpi{padding:10px 12px}
   .kpi .val{font-size:26px}
-  .banner{margin-bottom:8px;padding:10px 16px;font-size:13px;break-inside:avoid}
+  .hero{margin-bottom:10px;break-inside:avoid}
+  .hero h2{font-size:23px;margin-bottom:6px}
+  .hero .sub{font-size:12px;margin-bottom:14px}
+  .herobox{padding:16px 22px}
+  .herobox h3{font-size:16px}
+  .herobox p{font-size:12px;margin-bottom:12px}
+  .herostats{margin-bottom:12px;gap:30px}
+  .herostats .n{font-size:18px}
+  .herocta{padding:9px 22px;font-size:12.5px}
   .filterbar,.hint,.xf,.fcount{display:none !important}   /* interactive-only */
   .sec{break-before:page;break-after:avoid;margin:0 0 6px;padding-top:0;border-top:none}
   .sec.first{break-before:auto}
@@ -129,7 +146,7 @@ h1 span{color:var(--mint)}
 
 <div class="kpis" id="kpis"></div>
 
-<div class="banner" id="banner"></div>
+<div class="hero" id="hero"></div>
 
 <div class="filterbar" id="filterbar">
   <span class="flab">Language filter</span>
@@ -335,17 +352,27 @@ function render(langKey){
 }
 function fmt(n){return n>=1000?(n/1000).toFixed(n>=100000?0:1)+'K':''+n;}
 
-// ---- banner, KPIs, subline ----
+// ---- hero, KPIs, subline ----
 const m=D.meta;
 const fullRows = (D.full && D.full.rows) ? D.full.rows : m.source_rows;
 const fullPhd = (D.full && D.full.phd_total) ? D.full.phd_total : m.phd_count;
-document.getElementById('banner').innerHTML =
-  `<b>Domain Expert</b> = 10+ years of hands-on experience <b>or</b> a PhD.&nbsp; A network of `+
-  `<span class="big">${m.unique_candidates.toLocaleString()}</span> vetted experts and `+
-  `<span class="big">${fullPhd.toLocaleString()}</span> PhDs — active across 40,000+ colleges and 300,000+ companies, and growing every week.`;
+const LIVE_URL = 'https://dheeraj-ae-108.github.io/ae-talent-dashboard/';
+document.getElementById('hero').innerHTML = `
+  <div class="kicker">The Network &middot; Domain Experts</div>
+  <h2>Depth: verified experts, not a crowd.</h2>
+  <p class="sub">Beyond mass freelance pools, this network supplies verified domain experts and PhDs for frontier-AI training and evaluation &mdash; in-region, across ${m.languages_covered} Indian languages.</p>
+  <div class="herobox">
+    <h3>Domain Expert &amp; PhD Network &middot; For 8+ YoE</h3>
+    <p>Access to ${m.unique_candidates.toLocaleString()} vetted experts and ${fullPhd.toLocaleString()} PhDs across India, sourced through Arctic Engine's own network.</p>
+    <div class="herostats">
+      <div class="stat"><span class="n">40K+</span><span class="l">colleges</span></div>
+      <div class="stat"><span class="n">300K+</span><span class="l">partner companies</span></div>
+    </div>
+    <a class="herocta" href="${LIVE_URL}" target="_blank" rel="noopener">Live talent dashboard &rarr;</a>
+  </div>`;
 document.getElementById('subline').textContent = 'Domain-expert talent network for frontier AI';
 document.getElementById('kpis').innerHTML = `
-  <div class="kpi"><div class="lab">Domain experts</div><div class="val">${m.unique_candidates.toLocaleString()}</div><div class="note">10+ yrs experience or PhD</div></div>
+  <div class="kpi"><div class="lab">Domain experts</div><div class="val">${m.unique_candidates.toLocaleString()}</div><div class="note">8+ yrs experience or PhD</div></div>
   <div class="kpi"><div class="lab">Avg experience</div><div class="val">${(Math.round(m.avg_yoe*10)/10)} yrs</div><div class="note">${m.median_yoe} yrs median</div></div>
   <div class="kpi"><div class="lab">PhD network</div><div class="val">${fullPhd.toLocaleString()}</div><div class="note">across 40k+ colleges</div></div>
   <div class="kpi"><div class="lab">Languages</div><div class="val">${m.languages_covered}</div><div class="note">Indian languages covered</div></div>`;
