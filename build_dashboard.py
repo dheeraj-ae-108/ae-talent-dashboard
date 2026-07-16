@@ -178,7 +178,7 @@ function mk(id){const c=echarts.init(document.getElementById(id),null,{renderer:
 const baseTip={backgroundColor:'#15171b',borderColor:'#2a2d33',borderWidth:1,textStyle:{color:'#f4f4f2'}};
 const SHORTMAP={'Undergraduate':'Undergrad','Diploma / Certificate':'Diploma','PG Diploma':'PG Dip',
   'Humanities & Social Sciences':'Humanities','Finance & Economics':'Finance/Econ','Medicine & Health':'Medicine',
-  'Other / Unspecified':'Other','Other / Unclassified':'Other','FAANG / Global Big-Tech':'FAANG / Big-Tech',
+  'Subject not specified':'Not specified','Other / Unspecified':'Other','Other / Unclassified':'Other','FAANG / Global Big-Tech':'FAANG / Big-Tech',
   'Indian IT / Global Consulting':'Indian IT','Unicorn / Funded Startup':'Unicorn','Bank / BFSI / Large Enterprise':'BFSI / Enterprise'};
 function SHORT(n){return SHORTMAP[n]||n;}
 function sortObj(o){return Object.entries(o).sort((a,b)=>b[1]-a[1]);}
