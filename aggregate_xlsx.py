@@ -140,6 +140,25 @@ def phd_spec_display(s):
     return "Other / Unspecified" if str(s).strip().lower() in _PHD_UNSPEC else str(s).strip()
 def phd_domain2(s):
     return "Other / Unspecified" if str(s).strip().lower() in _PHD_UNSPEC else phd_domain(s)
+def phd_family(s):
+    t = str(s).lower().strip()
+    def has(*k): return any(x in t for x in k)
+    if t in _PHD_UNSPEC: return "Subject not specified"
+    if has("computer","information tech","data scien","software","informatics","artificial intel"): return "Computer Science & IT"
+    if has("pharma","medic","nursing","clinical","physiology","anatomy","dental","surgery","physiother","ayurved","health","nutrition"): return "Medicine, Pharmacy & Health"
+    if has("engineering","engineer","technology","instrumentation","aeronaut","automobile","mechatron","polymer"): return "Engineering & Technology"
+    if has("biotech","zoolog","botan","biochem","bioscience","microbio","genetic","biolog","life scien","biosci","entomolog"): return "Life Sciences & Biotech"
+    if has("chemis"): return "Chemistry"
+    if has("physic","mathemat","statistic","quantitative"): return "Physics & Mathematics"
+    if has("agricultur","agronom","horticultur","soil scien","fishery","veterinar","forestry","dairy","animal"): return "Agriculture & Allied"
+    if has("econom"): return "Economics"
+    if has("commerce","management","business","marketing","human resource","account","finance","banking"): return "Commerce, Management & Business"
+    if has("educat","pedagog"): return "Education"
+    if has("sociolog","psycholog","social work","social scien","political","geograph","anthropolog","public admin","women","gender","planning","defence","defense"): return "Social Sciences"
+    if has("law","legal","jurisprud"): return "Law"
+    if has("english","hindi","sanskrit","literatur","histor","arts","language","urdu","tamil","telugu","marathi","kannada","bengali","linguist","religio","cultur","music","fine art","philosoph","journalis","media","theolog","yoga","physical educat","humanit","design","fashion","jyotish","persian"): return "Humanities, Arts & Languages"
+    if has("environ","geolog","earth","atmospher","ocean"): return "Environmental & Earth Sci"
+    return "Other specialized fields"
 phd_spec = spec[spec["qual"] == "PhD"].copy()
 phd_spec["disp"] = phd_spec["spec"].map(phd_spec_display)
 phd_spec["dom"] = phd_spec["spec"].map(phd_domain2)
@@ -149,6 +168,9 @@ _named = phd_spec[phd_spec["disp"] != "Other / Unspecified"]
 _top = _named.groupby("disp")["n"].sum().sort_values(ascending=False).head(15)
 phd_top_spec_full = {k: int(v) for k, v in _top.items()}
 phd_top_spec_full["Other fields (total)"] = phd_total_full - int(_top.sum())
+# PhD FIELD FAMILIES — groups the 170+ fragmented specializations so no giant "Other"
+phd_spec["fam"] = phd_spec["spec"].map(phd_family)
+phd_families = phd_spec.groupby("fam")["n"].sum().sort_values(ascending=False).astype(int).to_dict()
 # top PhD specializations per domain (for PhD-network cross-filter)
 phd_specs_by_domain = {}
 for dom, g in _named.groupby("dom"):
@@ -171,6 +193,7 @@ data["full"] = {
     "phd_by_domain": phd_domain_full,
     "phd_total": phd_total_full,
     "phd_top_specializations": phd_top_spec_full,
+    "phd_families": phd_families,
     "phd_specs_by_domain": phd_specs_by_domain,
 }
 json.dump(data, open(OUT, "w"), separators=(",", ":"), default=str)

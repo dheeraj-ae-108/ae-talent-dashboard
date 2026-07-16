@@ -161,9 +161,9 @@ h1 span{color:var(--mint)}
   <div class="card c5"><h3>PhDs by domain</h3>
     <div class="cn">Filtered pool · subject inferred from specialization. <span class="hint">Tap a domain to see its specializations →</span></div>
     <div id="phdDomain" class="chart" style="height:365px"></div></div>
-  <div class="card c7"><h3>Top PhD specializations <span class="tag">full pool</span></h3>
-    <div class="cn">Full pool · 22,826 PhDs. "Pharmacy" includes Pharm.D; generic "Doctor of Philosophy" entries are folded into <i>Other fields</i>.<span class="xf" id="xfPhd"></span></div>
-    <div id="phdSpec" class="chart"></div></div>
+  <div class="card c7"><h3>PhDs by field <span class="tag">full pool</span></h3>
+    <div class="cn">22,826 PhDs grouped into field families (170+ raw specializations). "Subject not specified" = generic "Doctor of Philosophy" entries. <span class="hint">Tap a domain on the left to drill into individual specializations →</span><span class="xf" id="xfPhd"></span></div>
+    <div id="phdSpec" class="chart" style="height:400px"></div></div>
 </div>
 
 <div class="notes">
@@ -275,8 +275,8 @@ function drawQual(){
   chip('xfQual',selVert,()=>{selVert=null;drawQual();});
 }
 function drawPhdSpec(){
-  const src=(selPhd&&F.phd_specs_by_domain&&F.phd_specs_by_domain[selPhd])?F.phd_specs_by_domain[selPhd]:(F.phd_top_specializations||D.phd.top_specializations);
-  hbar('phdSpec',src,'#8b7ec8',15);
+  const src=(selPhd&&F.phd_specs_by_domain&&F.phd_specs_by_domain[selPhd])?F.phd_specs_by_domain[selPhd]:(F.phd_families||F.phd_top_specializations||D.phd.top_specializations);
+  hbar('phdSpec',src,'#8b7ec8',16);
   chip('xfPhd',selPhd,()=>{selPhd=null;drawPhdSpec();});
 }
 function drawTopEmp(){
