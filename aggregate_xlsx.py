@@ -23,9 +23,11 @@ def tech_stack(title):
     if rx(r'\bpython\b'): return "Python"
     if rx(r'\.net\b|\bc#|\bdot ?net\b|asp\.net'): return ".NET / C#"
     if rx(r'\bphp\b'): return "PHP"
+    if has('machine learning','ml engineer','ai engineer','artificial intel','deep learning',' nlp ','computer vision','data scien','gen ai','genai','llm'): return "AI / ML & Data Science"
+    if has('full stack','full-stack','fullstack','mern','mean stack'): return "Full-Stack Development"
     if has('javascript','typescript','react','angular','vue','node','front end','frontend','front-end','ui developer','ui/ux','web developer','wordpress','web design'): return "Web / Front-end"
     if has('android','ios developer','flutter','react native','mobile app','mobile developer','kotlin','swift developer'): return "Mobile"
-    if has('data scien','data analyst','data engineer','business intelligence','bi developer','bi analyst','tableau','power bi','big data','hadoop','machine learning','ml engineer','ai engineer','data architect','analytics'): return "Data & AI/ML"
+    if has('data analyst','data engineer','business intelligence','bi developer','bi analyst','tableau','power bi','big data','hadoop','data architect','analytics'): return "Data Engineering & Analytics"
     if rx(r'\bdba\b|database admin|database develop|sql develop|oracle dba|pl/sql|database engineer'): return "Database / SQL"
     if rx(r'\bqa\b|test engineer|software test|automation test|\bsdet\b|\btester\b|quality analyst|test analyst|automation engineer'): return "QA / Testing"
     if has('devops','cloud engineer','cloud architect','cloud administrat',' aws',' azure',' gcp ','kubernetes','docker','site reliability',' sre ','platform engineer','ci/cd'): return "Cloud / DevOps"
@@ -75,6 +77,23 @@ def sector(org):
         if re.search(pat, s):
             return name
     return "Regional & SME businesses"
+
+# ---------- PRESTIGE employer groups (sought-after clusters, FAANG-style, across industries) ----------
+_PRESTIGE_PATS = [
+    ("FAANG & Global Big-Tech", r'\bgoogle\b|\bamazon\b|\bmeta\b|facebook|\bapple\b|netflix|micro ?soft|nvidia|\bintel\b|qualcomm|\bcisco\b|\badobe\b|salesforce|\buber\b|linkedin|\boracle\b|\bsap\b|\bdell\b|\bibm\b|\bvmware\b|\bpaypal\b|samsung|\blg electronics|\bnokia\b|ericsson|hewlett|\bhp\b'),
+    ("Indian IT Majors", r'tata consult|\btcs\b|infosys|wipro|\bhcl\b|tech mahindra|mindtree|mphasis|ltimindtree|\blti\b|hexaware|coforge|persistent|birlasoft|zensar'),
+    ("Global Consulting & GCC", r'accenture|cognizant|capgemini|deloitte|\bpwc\b|\bkpmg\b|ernst|\bey\b|genpact|\bwns\b|\bdxc\b|\bntt\b|\batos\b|mckinsey|\bbcg\b|\bbain\b|nagarro|globallogic|epam|thoughtworks'),
+    ("Unicorns & Funded Startups", r'flipkart|\bpaytm\b|\bswiggy\b|zomato|\bola\b|\boyo\b|byju|\bphonepe\b|razorpay|\bmeesho\b|\bcred\b|\bzoho\b|freshworks|\bnykaa\b|unacademy|dream11|\bgroww\b|zerodha|policybazaar|lenskart|delhivery|\budaan\b|\bcars24|urban ?company|\bspinny|\bzepto|pharmeasy|\bpine ?labs|browserstack|postman'),
+    ("Global Banks & Financial", r'goldman|\bjp ?morgan\b|morgan stanley|\bciti\b|\bhsbc\b|standard chartered|barclays|deutsche|wells fargo|american express|\bubs\b|credit suisse|blackrock|bny mellon|nomura|societe generale|\bbnp\b|mastercard|\bvisa\b'),
+    ("Indian Conglomerates", r'reliance|\btata\b|aditya birla|mahindra|larsen|\bl&t\b|adani|\bitc\b|godrej|\bjsw\b|vedanta|essar|\bbajaj\b|\bhero\b'),
+    ("Global Consumer & Pharma MNCs", r'unilever|procter|\bp&g\b|nestle|pepsi|coca ?cola|colgate|\bmars\b|mondelez|\bpfizer\b|novartis|\bgsk\b|roche|astrazeneca|sanofi|abbott|\bcipla\b|dr\.? reddy|sun pharma|lupin|biocon'),
+]
+def prestige_group(org):
+    s = str(org).lower().strip()
+    for name, pat in _PRESTIGE_PATS:
+        if re.search(pat, s):
+            return name
+    return None
 
 def qual_bucket(c):
     c = str(c).lower()
@@ -129,6 +148,14 @@ employer_sectors = org.groupby("sector")["n"].sum().sort_values(ascending=False)
 employers_by_sector = {}
 for sec, g in org.groupby("sector"):
     employers_by_sector[sec] = g.sort_values("n", ascending=False).head(15).set_index("v")["n"].astype(int).to_dict()
+
+# PRESTIGE employer groups (FAANG-style, sought-after clusters) + drill to companies
+org["prestige"] = org["v"].map(prestige_group)
+_pg = org[org["prestige"].notna()]
+prestige_groups = _pg.groupby("prestige")["n"].sum().sort_values(ascending=False).astype(int).to_dict()
+employers_by_prestige = {}
+for grp, g in _pg.groupby("prestige"):
+    employers_by_prestige[grp] = g.sort_values("n", ascending=False).head(15).set_index("v")["n"].astype(int).to_dict()
 
 # sub-departments (full pool, top 15, skip blank)
 subdepts_full = sub.sort_values("n", ascending=False).head(15).set_index("v")["n"].astype(int).to_dict()
@@ -191,6 +218,8 @@ data["full"] = {
     "employers_by_tier": employers_by_tier,
     "employer_sectors": employer_sectors,
     "employers_by_sector": employers_by_sector,
+    "prestige_groups": prestige_groups,
+    "employers_by_prestige": employers_by_prestige,
     "subdepartments": subdepts_full,
     "qualifications": qualifications_full,
     "top_specializations": top_specializations_full,

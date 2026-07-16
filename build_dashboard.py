@@ -137,11 +137,11 @@ h1 span{color:var(--mint)}
 
 <div class="sec">Employer landscape <span class="tag">derived · full pool</span></div>
 <div class="grid">
-  <div class="card c6"><h3>Employer sectors — where our experts work</h3>
-    <div class="cn">Enterprise employers classified into industry (full ~1.40M-record pool).<span id="smeNote"></span> <span class="hint">Tap a sector to see its top employers →</span></div>
+  <div class="card c6"><h3>Employer sectors <span id="secScope" class="tag">industry</span></h3>
+    <div class="cn">Enterprise employers by industry.<span id="smeNote"></span> <span class="hint">Tap a sector to see its companies →</span><span class="xf" id="xfSec"></span></div>
     <div id="sectors" class="chart" style="height:430px"></div></div>
-  <div class="card c6"><h3>Top employers <span id="empScope" class="tag">premium tiers</span></h3>
-    <div class="cn">Marquee employers across the pool.<span class="xf" id="xfEmp"></span></div>
+  <div class="card c6"><h3>Prestige employer groups <span id="empScope" class="tag">sought-after</span></h3>
+    <div class="cn">Experts from FAANG, Indian IT majors, global consulting, unicorns, top banks &amp; conglomerates. <span class="hint">Tap a group to see its companies →</span><span class="xf" id="xfEmp"></span></div>
     <div id="topEmp" class="chart" style="height:430px"></div></div>
 </div>
 
@@ -262,7 +262,7 @@ const EXP_ORDER=['8–11 yrs','12–15 yrs','16–20 yrs','20+ yrs'];
 function orderExp(o){const r={};EXP_ORDER.forEach(k=>{if(o[k])r[k]=o[k]});return r;}
 const F = D.full || {};
 let active='All';            // active language filter
-let selVert=null,selPhd=null,selTier=null;   // per-section drill selections
+let selVert=null,selPhd=null,selSector=null,selPrestige=null;   // per-section drill selections
 function curP(){return D.by_language[active]||D.by_language['All'];}
 
 function chip(id,label,clearFn){
@@ -281,11 +281,27 @@ function drawPhdSpec(){
   hbar('phdSpec',src,'#8b7ec8',16);
   chip('xfPhd',selPhd,()=>{selPhd=null;drawPhdSpec();});
 }
-function drawTopEmp(){
-  const src=(selTier&&F.employers_by_sector&&F.employers_by_sector[selTier])?F.employers_by_sector[selTier]:(F.top_employers||D.top_employers);
-  hbar('topEmp',src,'#12a37a',15);
-  const es=document.getElementById('empScope'); if(es) es.textContent=selTier||'premium tiers';
-  chip('xfEmp',selTier||null,()=>{selTier=null;drawTopEmp();});
+const SEC_HIDE=['Regional & SME businesses','Unspecified','Other / Unclassified'];
+function drawSectors(){
+  let data;
+  if(selSector && F.employers_by_sector && F.employers_by_sector[selSector]){
+    data=F.employers_by_sector[selSector];
+  } else {
+    const all=F.employer_sectors||F.company_tiers||D.company_tiers||{};
+    data=Object.fromEntries(Object.entries(all).filter(([k])=>!SEC_HIDE.includes(k)));
+  }
+  hbar('sectors',data,'#0e7c72',14);
+  const sc=document.getElementById('secScope'); if(sc) sc.textContent=selSector||'industry';
+  const sme=document.getElementById('smeNote');
+  const smeN=(F.employer_sectors||{})['Regional & SME businesses']||0;
+  if(sme) sme.innerHTML=(!selSector&&smeN)?' Plus <b style="color:#3a3f47">'+smeN.toLocaleString()+'</b> at regional &amp; SME businesses.':'';
+  chip('xfSec',selSector,()=>{selSector=null;drawSectors();});
+}
+function drawPrestige(){
+  const data=(selPrestige&&F.employers_by_prestige&&F.employers_by_prestige[selPrestige])?F.employers_by_prestige[selPrestige]:(F.prestige_groups||F.top_employers||{});
+  hbar('topEmp',data,'#12a37a',14);
+  const es=document.getElementById('empScope'); if(es) es.textContent=selPrestige||'sought-after';
+  chip('xfEmp',selPrestige,()=>{selPrestige=null;drawPrestige();});
 }
 function setLang(l){
   active=l;
@@ -339,22 +355,15 @@ const fcEl=document.createElement('span');fcEl.className='fcount';fcEl.id='filte
 donut('lang', D.languages);
 hbar('techStack', F.tech_stack || D.tech.by_stack, '#0e7c72', 16);
 (function(){const tt=document.getElementById('techTotal');const n=(F.tech_titled_total)||Object.values(F.tech_stack||{}).reduce((a,b)=>a+b,0);if(tt)tt.textContent=n.toLocaleString();})();
-(function(){
-  const secAll=F.employer_sectors||F.company_tiers||D.company_tiers||{};
-  const HIDE=['Regional & SME businesses','Unspecified','Other / Unclassified'];
-  const secBar=Object.fromEntries(Object.entries(secAll).filter(([k])=>!HIDE.includes(k)));
-  hbar('sectors', secBar, '#0e7c72', 14);
-  const sme=secAll['Regional & SME businesses']||0;
-  const el=document.getElementById('smeNote');
-  if(el&&sme) el.innerHTML=' Plus <b style="color:#3a3f47">'+sme.toLocaleString()+'</b> experts at regional &amp; SME businesses — deep grassroots reach.';
-})();
 hbar('deptRaw', D.departments_top, '#2fb89a', 15);
 drawPhdSpec();
-drawTopEmp();
-// ---- cross-filter click handlers (tap a source category → partner chart updates) ----
+drawSectors();
+drawPrestige();
+// ---- cross-filter + drill click handlers ----
 charts.verticals.on('click',p=>{if(p.componentType==='series'&&p.seriesType==='bar'){selVert=(selVert===p.name)?null:p.name;drawQual();}});
 charts.phdDomain.on('click',p=>{if(p.data){selPhd=(selPhd===p.name)?null:p.name;drawPhdSpec();}});
-charts.sectors.on('click',p=>{if(p.name){selTier=(selTier===p.name)?null:p.name;drawTopEmp();}});
+charts.sectors.on('click',p=>{if(p.name&&F.employer_sectors&&(p.name in F.employer_sectors)){selSector=(selSector===p.name)?null:p.name;drawSectors();}});
+charts.topEmp.on('click',p=>{if(p.name&&F.prestige_groups&&(p.name in F.prestige_groups)){selPrestige=(selPrestige===p.name)?null:p.name;drawPrestige();}});
 charts.lang.on('click',p=>{if(p.data){setLang(active===p.name?'All':p.name);}});
 render('All');
 window.addEventListener('resize',()=>Object.values(charts).forEach(c=>c.resize()));
