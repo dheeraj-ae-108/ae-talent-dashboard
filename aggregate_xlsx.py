@@ -102,16 +102,25 @@ spec["qual"] = spec["course"].map(qual_bucket)
 qualifications_full = spec.groupby("qual")["n"].sum().sort_values(ascending=False).astype(int).to_dict()
 top_specializations_full = (spec[spec["spec"].notna()].groupby("spec")["n"].sum()
                             .sort_values(ascending=False).head(18).astype(int).to_dict())
+# "Philosophy"/blank = the "Doctor of Philosophy" degree-name artifact, not a subject
+_PHD_UNSPEC = ("", "nan", "philosophy", "doctor of philosophy", "phd", "ph.d", "ph.d.", "other")
+def phd_spec_display(s):
+    return "Other / Unspecified" if str(s).strip().lower() in _PHD_UNSPEC else str(s).strip()
+def phd_domain2(s):
+    return "Other / Unspecified" if str(s).strip().lower() in _PHD_UNSPEC else phd_domain(s)
 phd_spec = spec[spec["qual"] == "PhD"].copy()
-phd_spec["dom"] = phd_spec["spec"].map(phd_domain)
+phd_spec["disp"] = phd_spec["spec"].map(phd_spec_display)
+phd_spec["dom"] = phd_spec["spec"].map(phd_domain2)
 phd_domain_full = phd_spec.groupby("dom")["n"].sum().sort_values(ascending=False).astype(int).to_dict()
 phd_total_full = int(phd_spec["n"].sum())
-phd_top_spec_full = (phd_spec[phd_spec["spec"].notna()].groupby("spec")["n"].sum()
-                     .sort_values(ascending=False).head(18).astype(int).to_dict())
+_named = phd_spec[phd_spec["disp"] != "Other / Unspecified"]
+_top = _named.groupby("disp")["n"].sum().sort_values(ascending=False).head(15)
+phd_top_spec_full = {k: int(v) for k, v in _top.items()}
+phd_top_spec_full["Other fields (total)"] = phd_total_full - int(_top.sum())
 # top PhD specializations per domain (for PhD-network cross-filter)
 phd_specs_by_domain = {}
-for dom, g in phd_spec[phd_spec["spec"].notna()].groupby("dom"):
-    phd_specs_by_domain[dom] = (g.groupby("spec")["n"].sum()
+for dom, g in _named.groupby("dom"):
+    phd_specs_by_domain[dom] = (g.groupby("disp")["n"].sum()
                                 .sort_values(ascending=False).head(15).astype(int).to_dict())
 
 data = json.load(open(OUT))

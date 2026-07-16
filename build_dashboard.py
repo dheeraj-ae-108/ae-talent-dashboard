@@ -61,6 +61,10 @@ h1 span{color:var(--mint)}
 .xf.on{display:inline-block}
 .xf b{font-weight:700}
 .hint{color:#9aa0a8;font-style:italic}
+.banner{background:linear-gradient(100deg,#0e7c72 0%,#0a5d55 100%);color:#eafaf6;border-radius:14px;
+  padding:14px 20px;margin-bottom:22px;font-size:15px;box-shadow:0 3px 14px rgba(14,124,114,.28)}
+.banner b{color:#fff;font-weight:700}
+.banner .big{color:var(--mint);font-weight:700}
 .sec{margin:30px 0 4px;font-size:12.5px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;
   border-top:1px solid var(--panel-brd);padding-top:18px;font-weight:600}
 .notes{margin-top:30px;background:var(--bg-soft);border:1px solid var(--panel-brd);border-radius:14px;padding:18px 22px;
@@ -100,51 +104,33 @@ h1 span{color:var(--mint)}
 
 <div class="kpis" id="kpis"></div>
 
+<div class="banner" id="banner"></div>
+
 <div class="filterbar" id="filterbar">
   <span class="flab">Language filter</span>
 </div>
 
-<div class="sec">Domain landscape</div>
+<div class="sec">1 · Years of experience</div>
 <div class="grid">
-  <div class="card c8"><h3>Domain segment share (%) vs. median years of experience</h3>
-    <div class="cn">Verticals derived from department. Bars = share of filtered pool · line = median years. <span class="hint">Tap a bar to break it down by qualification →</span></div>
-    <div id="verticals" class="chart" style="height:340px"></div></div>
-  <div class="card c4"><h3>Qualification levels</h3>
-    <div class="cn">Highest degree per candidate.<span class="xf" id="xfQual"></span></div>
-    <div id="qual" class="chart" style="height:365px"></div></div>
+  <div class="card c12"><h3>Experience distribution</h3>
+    <div class="cn">Candidates by years of professional experience. Domain-expert floor is 8+ years.</div>
+    <div id="exphist" class="chart" style="height:300px"></div></div>
 </div>
 
-<div class="sec">Experience &amp; language</div>
+<div class="sec">2 · Domain, department, language &amp; education</div>
 <div class="grid">
-  <div class="card c8"><h3>Years-of-experience distribution</h3>
-    <div class="cn">Person-level. Pool floor is ~10 years.</div>
-    <div id="exphist" class="chart"></div></div>
-  <div class="card c4"><h3>Multi-lingual pool <span class="tag">global</span></h3>
+  <div class="card c8"><h3>Domain segments — candidates &amp; median experience</h3>
+    <div class="cn">Verticals grouped from department; blank departments remapped from job title. Bars = candidates · line = median years of experience. <span class="hint">Tap a bar to break it down by qualification →</span></div>
+    <div id="verticals" class="chart" style="height:360px"></div></div>
+  <div class="card c4"><h3>Education — qualification levels</h3>
+    <div class="cn">Highest degree per candidate.<span class="xf" id="xfQual"></span></div>
+    <div id="qual" class="chart" style="height:360px"></div></div>
+  <div class="card c6"><h3>Top departments</h3>
+    <div class="cn">Most common departments across the pool.</div>
+    <div id="deptRaw" class="chart"></div></div>
+  <div class="card c6"><h3>Multi-lingual pool <span class="tag">global</span></h3>
     <div class="cn">Language mentions across candidates. <span class="hint">Tap a language to filter the whole dashboard →</span></div>
     <div id="lang" class="chart" style="height:365px"></div></div>
-</div>
-
-<div class="sec">PhD network</div>
-<div class="grid">
-  <div class="card c5"><h3>PhDs by domain</h3>
-    <div class="cn">Filtered pool · from specialization title. <span class="hint">Tap a domain to see its specializations →</span></div>
-    <div id="phdDomain" class="chart" style="height:365px"></div></div>
-  <div class="card c7"><h3>Top PhD specializations <span class="tag">full pool</span></h3>
-    <div class="cn">Full ~1.40M-record pool · 22,826 PhDs.<span class="xf" id="xfPhd"></span></div>
-    <div id="phdSpec" class="chart"></div></div>
-</div>
-
-<div class="sec">Tech / coding sub-cut</div>
-<div class="grid">
-  <div class="card c12"><h3>Tech stack / discipline distribution <span class="tag">title-derived · full pool</span></h3>
-    <div class="cn">From job title across the full ~1.40M-record pool — 34,949 clearly-technical titles. Explicit-language titles (Java/Python/.NET/PHP) counted directly; other technical titles mapped to closest discipline. (Language-level counts are small — most tech titles state a role, not a language.)</div>
-    <div id="techStack" class="chart" style="height:360px"></div></div>
-  <div class="card c6"><h3>Tech pool by department <span class="tag warn">export sample</span></h3>
-    <div class="cn">Software/IT/Hardware/Data/Product departments (person-level export).</div>
-    <div id="techDept" class="chart"></div></div>
-  <div class="card c6"><h3>Tech pool by experience band <span class="tag warn">export sample</span></h3>
-    <div class="cn">Filtered tech candidates (person-level export).</div>
-    <div id="techExp" class="chart" style="height:365px"></div></div>
 </div>
 
 <div class="sec">Company landscape <span class="tag">derived · full pool</span></div>
@@ -157,20 +143,27 @@ h1 span{color:var(--mint)}
     <div id="topEmp" class="chart"></div></div>
 </div>
 
-<div class="sec">Supporting context <span class="tag">full pool</span></div>
+<div class="sec">3 · Coding &amp; tech</div>
 <div class="grid">
-  <div class="card c6"><h3>Top sub-departments</h3>
-    <div class="cn">Full ~1.40M-record pool · top 15 sub-departments.</div>
-    <div id="subDept" class="chart"></div></div>
-  <div class="card c6"><h3>Top specializations (all degrees)</h3>
-    <div class="cn">Full pool · most common fields of study.</div>
-    <div id="specTop" class="chart"></div></div>
-  <div class="card c6"><h3>Top departments <span class="tag warn">export sample</span></h3>
-    <div class="cn">Person-level export, top 15 departments.</div>
-    <div id="deptRaw" class="chart"></div></div>
-  <div class="card c6"><h3>Elite institute signal <span class="tag warn">proxy · sparse</span></h3>
-    <div class="cn">Keyword match on institute name. Only ~2% of records list an institute, so treat as directional only.</div>
-    <div id="tiers" class="chart"></div></div>
+  <div class="card c12"><h3>Tech stack / discipline distribution <span class="tag">title-derived · full pool</span></h3>
+    <div class="cn">From job title across the full ~1.40M-record pool — 34,949 clearly-technical titles. Explicit-language titles (Java/Python/.NET/PHP) counted directly; other technical titles mapped to the closest discipline.</div>
+    <div id="techStack" class="chart" style="height:360px"></div></div>
+  <div class="card c6"><h3>Tech pool by department <span class="tag warn">export sample</span></h3>
+    <div class="cn">Software/IT/Hardware/Data/Product departments.</div>
+    <div id="techDept" class="chart"></div></div>
+  <div class="card c6"><h3>Tech pool by experience band <span class="tag warn">export sample</span></h3>
+    <div class="cn">Filtered tech candidates.</div>
+    <div id="techExp" class="chart" style="height:365px"></div></div>
+</div>
+
+<div class="sec">4 · PhD network</div>
+<div class="grid">
+  <div class="card c5"><h3>PhDs by domain</h3>
+    <div class="cn">Filtered pool · subject inferred from specialization. <span class="hint">Tap a domain to see its specializations →</span></div>
+    <div id="phdDomain" class="chart" style="height:365px"></div></div>
+  <div class="card c7"><h3>Top PhD specializations <span class="tag">full pool</span></h3>
+    <div class="cn">Full pool · 22,826 PhDs. "Pharmacy" includes Pharm.D; generic "Doctor of Philosophy" entries are folded into <i>Other fields</i>.<span class="xf" id="xfPhd"></span></div>
+    <div id="phdSpec" class="chart"></div></div>
 </div>
 
 <div class="notes">
@@ -179,7 +172,8 @@ h1 span{color:var(--mint)}
     <li><b>Two data sources.</b> Panels tagged <span class="tag">full pool</span> use the authoritative distinct-count sheets (<i>Arctic Engine · Data Req</i>) covering the full <b>1,402,050-record</b> pool. Panels tagged <span class="tag warn">export sample</span> use the person-level CSV export, which is truncated at 1,048,575 rows (916,607 unique candidates) — used only where person-level joins or the language filter are needed.</li>
     <li><b>Tech stack is title-derived.</b> No language column exists, so stack/discipline is inferred from job title across the full pool — explicit-language titles (Java/Python/.NET/PHP) counted directly; other technical titles mapped to the closest discipline. Only ~35K titles are unambiguously technical, so language-level counts are directional, not self-reported.</li>
     <li><b>Company tier is derived from the employer name.</b> 97% of records name an employer; we keyword-match to FAANG/global big-tech, Indian IT/consulting, unicorn/startup, and BFSI/enterprise. Unmatched names fall to "Other" (self-employed, govt, SMEs).</li>
-    <li><b>Institute tier is sparse.</b> ~98% of rows have a blank institute name; IIT/NIT/IIM keyword matches are directional, not a census.</li>
+    <li><b>Domain remapping.</b> Candidates with a blank department (~30% of the raw export) are reassigned to a domain from their job title (best-effort). This cut "Unclassified" from ~30% to ~12%; the rest are genuinely generic titles (e.g. "Manager", "Director") or have no title.</li>
+    <li><b>PhD data cleaned.</b> "Doctor of Philosophy" degree-name entries (job titles were science/biology teachers, not philosophers) are folded into <i>Other fields</i> rather than counted as Philosophy. "Pharmacy" includes Pharm.D (Doctor of Pharmacy) holders. Getting <b>new PhDs is low-friction</b> — the network already spans 40k+ colleges.</li>
     <li><b>No active-status field</b> exists, so that cut is omitted. <b>Languages:</b> only 10 regional languages are captured; Hindi/Urdu/Punjabi are absent.</li>
     <li>Person-level (export) stats dedupe to one row per <code>user_id</code> (highest qualification kept). Full-pool sheets are record-level frequency counts.</li>
   </ul>
@@ -235,33 +229,34 @@ function verticalsChart(v){
     tooltip:{...baseTip,trigger:'axis',axisPointer:{type:'shadow'},
       formatter:p=>{const i=p[0].dataIndex,d=v[i];
         return '<b>'+p[0].axisValue+'</b><br/>'+
-          p[0].marker+'Share: <b>'+d.share+'%</b><br/>'+
-          '&nbsp;&nbsp;&nbsp;&nbsp;Candidates: <b>'+d.count.toLocaleString()+'</b><br/>'+
+          p[0].marker+'Candidates: <b>'+d.count.toLocaleString()+'</b><br/>'+
           p[1].marker+'Median exp: <b>'+d.median_yoe+' yrs</b>';}},
-    legend:{textStyle:{color:AX},top:0,itemGap:16},
-    grid:{left:26,right:38,top:36,bottom:72,containLabel:true},
+    legend:{data:['Candidates','Median exp'],textStyle:{color:AX},top:0,itemGap:16},
+    grid:{left:30,right:44,top:36,bottom:74,containLabel:true},
     xAxis:{type:'category',data:v.map(x=>x.name),axisLabel:{color:AX,rotate:30,fontSize:9.5,interval:0,margin:12},
       axisTick:{show:false}},
-    yAxis:[{type:'value',name:'Share %',nameTextStyle:{color:AX},nameGap:14,axisLabel:{color:AX,formatter:'{value}%'},splitLine:{lineStyle:{color:GRID}}},
+    yAxis:[{type:'value',name:'Candidates',nameTextStyle:{color:AX},nameGap:14,axisLabel:{color:AX,formatter:n=>fmt(n)},splitLine:{lineStyle:{color:GRID}}},
            {type:'value',name:'Median yrs',nameTextStyle:{color:AX},nameGap:14,axisLabel:{color:AX},splitLine:{show:false},min:8}],
     series:[
-      {name:'Share %',type:'bar',barMaxWidth:34,data:v.map(x=>x.share),itemStyle:{color:'#0e7c72',borderRadius:[4,4,0,0]},
-        label:{show:true,position:'top',color:'#5a5f67',fontSize:9,fontWeight:500,formatter:p=>fmt(v[p.dataIndex].count)}},
+      {name:'Candidates',type:'bar',barMaxWidth:34,data:v.map(x=>x.count),itemStyle:{color:'#0e7c72',borderRadius:[4,4,0,0]},
+        label:{show:true,position:'top',color:'#5a5f67',fontSize:8.5,fontWeight:500,formatter:p=>p.value.toLocaleString()}},
       {name:'Median exp',type:'line',yAxisIndex:1,data:v.map(x=>x.median_yoe),smooth:true,
         lineStyle:{color:'#f0a15c',width:3},itemStyle:{color:'#f0a15c'},symbolSize:7,z:3}]});
 }
 
-function expHist(hist){
-  const e=Object.entries(hist).map(([k,v])=>[+k,v]).sort((a,b)=>a[0]-b[0]);
-  charts.exphist.setOption({tooltip:{...baseTip,trigger:'axis'},
-    grid:{left:8,right:20,top:14,bottom:24,containLabel:true},
-    xAxis:{type:'category',data:e.map(x=>x[0]),name:'years',nameTextStyle:{color:AX},axisLabel:{color:AX}},
-    yAxis:{type:'value',axisLabel:{color:AX},splitLine:{lineStyle:{color:GRID}}},
-    series:[{type:'bar',data:e.map(x=>x[1]),itemStyle:{color:'#0e7c72',borderRadius:[3,3,0,0]}}]});
+function expHist(buckets){
+  const order=EXP_ORDER.filter(k=>buckets[k]!=null);
+  charts.exphist.setOption({tooltip:{...baseTip,trigger:'axis',axisPointer:{type:'shadow'},
+      formatter:p=>p[0].name+': <b>'+p[0].value.toLocaleString()+'</b> candidates'},
+    grid:{left:14,right:28,top:16,bottom:30,containLabel:true},
+    xAxis:{type:'category',data:order,axisLabel:{color:'#3a3f47',fontSize:12.5,fontWeight:500}},
+    yAxis:{type:'value',axisLabel:{color:AX,formatter:n=>fmt(n)},splitLine:{lineStyle:{color:GRID}}},
+    series:[{type:'bar',barMaxWidth:110,data:order.map(k=>buckets[k]),itemStyle:{color:'#0e7c72',borderRadius:[5,5,0,0]},
+      label:{show:true,position:'top',color:'#3a3f47',fontSize:13,fontWeight:600,formatter:p=>p.value.toLocaleString()}}]});
 }
 
 // ---- filterable + cross-filter charts ----
-const EXP_ORDER=['<10 yrs','10–12 yrs','13–15 yrs','16–20 yrs','20+ yrs'];
+const EXP_ORDER=['8–11 yrs','12–15 yrs','16–20 yrs','20+ yrs'];
 function orderExp(o){const r={};EXP_ORDER.forEach(k=>{if(o[k])r[k]=o[k]});return r;}
 const F = D.full || {};
 let active='All';            // active language filter
@@ -302,24 +297,29 @@ function render(langKey){
   donut('phdDomain',P.phd_by_domain);
   hbar('techDept',P.tech_by_department,'#6ad1fa');
   donut('techExp',orderExp(P.experience_buckets));
-  expHist(P.experience_hist||D.experience_hist);
-  document.getElementById('kpi-n').textContent=fmt(P.n);
+  expHist(P.experience_buckets);
+  document.getElementById('kpi-n').textContent=P.n.toLocaleString();
   document.getElementById('kpi-phd').textContent=fmt(P.phd_count);
   document.getElementById('kpi-tech').textContent=fmt(P.tech_count);
 }
-function fmt(n){return n>=1000?(n/1000).toFixed(n>=100000?0:1)+'K':n;}
+function fmt(n){return n>=1000?(n/1000).toFixed(n>=100000?0:1)+'K':''+n;}
 
-// ---- KPIs + subline ----
+// ---- banner, KPIs, subline ----
 const m=D.meta;
 const fullRows = (D.full && D.full.rows) ? D.full.rows : m.source_rows;
 const fullPhd = (D.full && D.full.phd_total) ? D.full.phd_total : m.phd_count;
+document.getElementById('banner').innerHTML =
+  `<b>Domain Expert</b> = 10+ years of experience <b>OR</b> a PhD.&nbsp; This network holds `+
+  `<span class="big">${fullRows.toLocaleString()}</span> expert records · `+
+  `<span class="big">${m.unique_candidates.toLocaleString()}</span> unique people · `+
+  `<span class="big">${fullPhd.toLocaleString()}</span> PhDs — and it keeps growing (active across 40k+ colleges & 300k+ companies).`;
 document.getElementById('subline').innerHTML =
-  `Full pool ≈ <b style="color:#f4f4f2">${fullRows.toLocaleString()}</b> records (per data-req sheet) · `+
-  `${m.unique_candidates.toLocaleString()} unique candidates in the person-level export · generated ${m.generated}`;
+  `Full pool ≈ <b style="color:#f4f4f2">${fullRows.toLocaleString()}</b> records · `+
+  `${m.unique_candidates.toLocaleString()} unique candidates · generated ${m.generated}`;
 document.getElementById('kpis').innerHTML = `
-  <div class="kpi"><div class="lab">Full pool records</div><div class="val">${fmt(fullRows)}</div><div class="note" style="color:var(--ink-dim)">${(m.unique_candidates/1000).toFixed(0)}K unique in export</div></div>
+  <div class="kpi"><div class="lab">Domain-expert records</div><div class="val">${fullRows.toLocaleString()}</div><div class="note" style="color:var(--ink-dim)">${m.unique_candidates.toLocaleString()} unique people</div></div>
   <div class="kpi"><div class="lab">Median / Avg experience</div><div class="val">${m.median_yoe} / ${m.avg_yoe}</div><div class="note" style="color:var(--ink-dim)">years, person-level</div></div>
-  <div class="kpi"><div class="lab">PhD network</div><div class="val">${fmt(fullPhd)}</div><div class="note" style="color:var(--ink-dim)">full pool · ${m.languages_covered} languages</div></div>
+  <div class="kpi"><div class="lab">PhD network</div><div class="val">${fullPhd.toLocaleString()}</div><div class="note" style="color:var(--ink-dim)">full pool · ${m.languages_covered} languages</div></div>
   <div class="kpi"><div class="lab">Candidates (filtered)</div><div class="val" id="kpi-n"></div><div class="note" style="color:var(--ink-dim)">by language · <span id="kpi-phd"></span> PhD · <span id="kpi-tech"></span> tech</div></div>`;
 
 // ---- language filter pills ----
@@ -333,14 +333,11 @@ langs.forEach(l=>{
 
 // init
 ['verticals','qual','exphist','lang','phdDomain','phdSpec','techStack',
- 'techDept','techExp','companyTiers','topEmp','subDept','specTop','deptRaw','tiers'].forEach(mk);
+ 'techDept','techExp','companyTiers','topEmp','deptRaw'].forEach(mk);
 donut('lang', D.languages);
 hbar('techStack', F.tech_stack || D.tech.by_stack, '#0e7c72', 16);
 donut('companyTiers', F.company_tiers || D.company_tiers);
-hbar('subDept', F.subdepartments || {}, '#2fb89a', 15);
-hbar('specTop', F.top_specializations || {}, '#6ad1fa', 15);
 hbar('deptRaw', D.departments_top, '#2fb89a', 15);
-hbar('tiers', D.institute_tiers, '#f0a15c');
 drawPhdSpec();
 drawTopEmp();
 // ---- cross-filter click handlers (tap a source category → partner chart updates) ----

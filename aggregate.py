@@ -63,10 +63,28 @@ def vertical(dep):
     if has("marketing","brand","digital marketing","advertising","communication"): return "Marketing"
     if has("design","media production","content","creative","writing"): return "Design & Content"
     if has("sales","bd","business development","retail","ecommerce"): return "Sales & Enterprise"
-    if has("manufactur","production","construction","site engineering"): return "Manufacturing & Engineering"
-    if has("admin","operations","customer support","purchase","supply chain","human resources","facility","project & program"): return "Operations & Support"
+    if has("manufactur","production","construction","site engineering","maintenance","quality assurance",
+           "aviation","aerospace","energy","mining","tailoring","apparel","research & development","engineering"): return "Manufacturing & Engineering"
+    if has("admin","operations","customer support","purchase","supply chain","human resources","facility","project & program",
+           "delivery","driver","logistics","security services","shipping","maritime","domestic worker"): return "Operations & Support"
     if d == "": return "Unclassified"
     return "Other"
+
+# ---------- vertical fallback from job_title (best-effort remap of Unclassified) ----------
+def vertical_from_title(title):
+    t = " " + str(title).lower() + " "
+    def has(*ks): return any(k in t for k in ks)
+    if has("account","audit","tax","finance","financial","banking","\bbank","loan","credit","cashier","billing","treasury","ca ","chartered account","collection","recovery","insurance advisor","underwrit","actuar","wealth","invest"): return "Finance & Banking"
+    if has("teacher","teaching","professor","lecturer","tutor","faculty","principal","educat","trainer","instructor","academic","warden","librarian","counsellor"): return "Education"
+    if has("doctor","nurse","nursing","pharmac","medical","clinical","hospital","physician","surgeon","dental","physiother","radiolog","lab technician","pathology","paramedic","dmo","healthcare","ward ","ayurved","optometr","dietician"): return "Healthcare"
+    if has("software","developer","programmer"," it ","information tech","system admin","network engineer","data scien","data analyst","data engineer","devops","full stack","web developer","tech lead","qa engineer","test engineer","database","mis ","business analyst"): return "Technology"
+    if has("marketing","brand","digital market","seo","content market","advertis","social media","campaign","public relation"): return "Marketing"
+    if has("designer","graphic","ui/ux","ux","creative","video edit","photograph","animation","illustrat","content writer","copywriter","fashion","interior"): return "Design & Content"
+    if has("legal","lawyer","advocate","attorney","paralegal","compliance officer"): return "Legal"
+    if has("sales","business development","bd ","bde","territory","area sales","relationship manager","account manager","key account","retail","ecommerce","store manager","branch manager","agency manager","counter sales","field officer","asm","insurance sales","dealer"): return "Sales & Enterprise"
+    if has("engineer","technician","civil","mechanical","electrical","electronic","production","manufactur","factory","plant","site ","fabrication","welder","fitter","machinist","quality control","maintenance","supervisor","foreman","cnc","instrumentation","electrician","plumber","carpenter","machine operator","assembly","mechanic","turner","boiler","surveyor","draughtsman"): return "Manufacturing & Engineering"
+    if has("admin","office","back office","computer operator","data entry","clerk","receptionist","secretary","driver","logistic","delivery","warehouse","supply","procurement","purchase","hr ","human resource","recruit","payroll","operation","coordinator","executive assistant","stores","store incharge","inventory","stock","customer care","customer service","customer support","facility","housekeeping","security","transport","fleet","dispatch","hotel","restaurant","hospitality","catering","chef","cook","waiter","front desk","cabin crew","peon","office boy"): return "Operations & Support"
+    return "Unclassified"
 
 # ---------- role -> stack / discipline bucket (inferred from job_title) ----------
 def stack_bucket(title):
@@ -134,11 +152,10 @@ for s in person["languages"]:
         l = l.strip()
         if l: lang[l] += 1
 
-# experience buckets (person-level)
+# experience buckets (person-level) — 8-11 / 12-15 / 16-20 / 20+
 def exp_bucket(y):
-    if y < 10: return "<10 yrs"
-    if y <= 12: return "10–12 yrs"
-    if y <= 15: return "13–15 yrs"
+    if y <= 11: return "8–11 yrs"
+    if y <= 15: return "12–15 yrs"
     if y <= 20: return "16–20 yrs"
     return "20+ yrs"
 person["expb"] = person["yoe"].map(exp_bucket)
@@ -146,8 +163,13 @@ person["expb"] = person["yoe"].map(exp_bucket)
 # qualification distribution person-level
 qual_dist = person["qual"].value_counts().to_dict()
 
-# vertical + median yoe person-level
-person["vertical"] = person["department"].map(vertical)
+# vertical + median yoe person-level — remap blank-department via job_title
+def vert_combined(row):
+    v = vertical(row["department"])
+    if v == "Unclassified":
+        v = vertical_from_title(row["job_title"])
+    return v
+person["vertical"] = person.apply(vert_combined, axis=1)
 vg = person.groupby("vertical").agg(count=("user_id","size"), median_yoe=("yoe","median"))
 vg = vg.sort_values("count", ascending=False)
 verticals = [{"name":i, "count":int(r["count"]), "median_yoe":float(r["median_yoe"]),
@@ -161,13 +183,22 @@ median_yoe = float(person["yoe"].median())
 
 # ========== PhD NETWORK ==========
 print("phd network…")
+# "Philosophy"/blank specialization = the "Doctor of Philosophy" degree-name artifact, not a subject
+_PHD_UNSPEC = ("", "philosophy", "doctor of philosophy", "phd", "ph.d", "ph.d.", "other")
+def phd_spec_display(s):
+    return "Other / Unspecified" if str(s).strip().lower() in _PHD_UNSPEC else str(s).strip()
+def phd_domain2(s):
+    return "Other / Unspecified" if str(s).strip().lower() in _PHD_UNSPEC else phd_domain(s)
 phd_rows = df[df["qual"]=="PhD"].copy()
 phd_users = phd_rows.drop_duplicates("user_id").copy()
-phd_users["pdomain"] = phd_users["specialization_title"].map(phd_domain)
+phd_users["pdomain"] = phd_users["specialization_title"].map(phd_domain2)
 phd_domain_dist = phd_users["pdomain"].value_counts().to_dict()
-phd_spec_top = phd_users[phd_users["specialization_title"]!=""]["specialization_title"].value_counts().head(20)
-phd_vertical = phd_users["department"].map(vertical).value_counts().to_dict()
 N_PHD = phd_users["user_id"].nunique()
+phd_users["spec_disp"] = phd_users["specialization_title"].map(phd_spec_display)
+_sc = phd_users[phd_users["spec_disp"] != "Other / Unspecified"]["spec_disp"].value_counts().head(15)
+phd_spec_top = {k: int(v) for k, v in _sc.items()}
+phd_spec_top["Other fields (total)"] = int(N_PHD) - int(_sc.sum())
+phd_vertical = phd_users["department"].map(vertical).value_counts().to_dict()
 
 # ========== TECH / CODING SUB-CUT (proxy: software+IT depts) ==========
 print("tech sub-cut…")
@@ -216,7 +247,7 @@ def panel_for(sub):
     verts = [{"name": i, "count": int(r["count"]), "median_yoe": float(r["median_yoe"]),
               "share": round(100 * r["count"] / n, 2) if n else 0} for i, r in vg.iterrows()]
     ph = sub[sub["qual"] == "PhD"].copy()
-    ph_dom = ph["specialization_title"].map(phd_domain).value_counts().to_dict() if len(ph) else {}
+    ph_dom = ph["specialization_title"].map(phd_domain2).value_counts().to_dict() if len(ph) else {}
     tk = sub[sub["department"].isin(TECH_DEPTS)]
     ehist = sub["yoe"].value_counts()
     ehist = {int(k): int(v) for k, v in ehist.items() if k <= 35}
