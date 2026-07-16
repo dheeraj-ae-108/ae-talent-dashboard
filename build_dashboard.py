@@ -168,19 +168,6 @@ h1 span{color:var(--mint)}
     <div id="phdSpec" class="chart" style="height:400px"></div></div>
 </div>
 
-<div class="notes">
-  <b>Data notes &amp; caveats</b>
-  <ul>
-    <li><b>Two data sources.</b> Panels tagged <span class="tag">full pool</span> use the authoritative distinct-count sheets (<i>Arctic Engine · Data Req</i>) covering the full <b>1,402,050-record</b> pool. Panels tagged <span class="tag warn">export sample</span> use the person-level CSV export, which is truncated at 1,048,575 rows (916,607 unique candidates) — used only where person-level joins or the language filter are needed.</li>
-    <li><b>Tech stack is title-derived.</b> No language column exists, so stack/discipline is inferred from job title across the full pool — explicit-language titles (Java/Python/.NET/PHP) counted directly; other technical titles mapped to the closest discipline. Only ~35K titles are unambiguously technical, so language-level counts are directional, not self-reported.</li>
-    <li><b>Employer sectors are derived from the employer name.</b> 97% of records name an employer; we classify each into an industry sector (IT services, BFSI, manufacturing, healthcare, education, telecom, govt/defense, etc.). Names that don't map to a sector — genuinely small/regional businesses and self-employed — are grouped as "Regional & SME businesses" (~55%), reflecting the pool's deep grassroots reach alongside enterprise coverage.</li>
-    <li><b>Domain remapping.</b> Candidates with a blank department (~30% of the raw export) are reassigned to a domain from their job title (best-effort). This cut "Unclassified" from ~30% to ~12%; the rest are genuinely generic titles (e.g. "Manager", "Director") or have no title.</li>
-    <li><b>PhD data cleaned.</b> "Doctor of Philosophy" degree-name entries (job titles were science/biology teachers, not philosophers) are folded into <i>Other fields</i> rather than counted as Philosophy. "Pharmacy" includes Pharm.D (Doctor of Pharmacy) holders. Getting <b>new PhDs is low-friction</b> — the network already spans 40k+ colleges.</li>
-    <li><b>No active-status field</b> exists, so that cut is omitted. <b>Languages:</b> only 10 regional languages are captured; Hindi/Urdu/Punjabi are absent.</li>
-    <li>Person-level (export) stats dedupe to one row per <code>user_id</code> (highest qualification kept). Full-pool sheets are record-level frequency counts.</li>
-  </ul>
-</div>
-
 <script>
 const D = __DATA__;
 const AX = '#697078', GRID='rgba(21,23,27,.07)';
