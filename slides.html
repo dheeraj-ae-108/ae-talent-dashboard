@@ -14,11 +14,11 @@ html,body{margin:0;background:#fff;font-family:'Inter',-apple-system,'Segoe UI',
 @page{size:A4 landscape;margin:9mm}
 .slide{width:1055px;padding:0;break-after:page}
 .slide:last-child{break-after:auto}
-.sec{font-size:12.5px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;font-weight:700;margin:0 0 8px}
-.card{background:var(--panel);border:1px solid var(--panel-brd);border-radius:14px;padding:11px 18px 8px;margin-bottom:10px}
+.sec{font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;font-weight:700;margin:0 0 8px}
+.card{background:var(--panel);border:1px solid var(--panel-brd);border-radius:14px;padding:14px 20px 10px;margin-bottom:10px}
 .card:last-child{margin-bottom:0}
-.card h3{margin:0 0 2px;font-size:15px;font-weight:700;color:var(--ink)}
-.card .cn{font-size:11.5px;color:var(--ink-dim);margin-bottom:4px;line-height:1.45}
+.card h3{margin:0 0 3px;font-size:18px;font-weight:700;color:var(--ink)}
+.card .cn{font-size:12.5px;color:var(--ink-dim);margin-bottom:4px;line-height:1.45}
 .row2{display:flex;gap:14px}
 .row2 .card{flex:1;margin-bottom:0}
 </style>
@@ -26,17 +26,19 @@ html,body{margin:0;background:#fff;font-family:'Inter',-apple-system,'Segoe UI',
 <body>
 
 <div class="slide" id="slide1">
-  <div class="sec">1 &middot; Years of experience</div>
-  <div class="card">
-    <h3>Experience distribution</h3>
-    <div class="cn">Candidates by years of professional experience. Domain-expert floor is 8+ years.</div>
-    <div id="expChart" style="width:100%;height:180px"></div>
-  </div>
-  <div class="sec" style="margin-top:10px">2 &middot; Domain, department</div>
-  <div class="card">
-    <h3>Domain segments — candidates</h3>
-    <div class="cn">Verticals grouped from department; blank departments remapped from job title.</div>
-    <div id="domainChart" style="width:100%;height:340px"></div>
+  <div class="row2">
+    <div class="card">
+      <div class="sec">1 &middot; Years of experience</div>
+      <h3>Experience distribution</h3>
+      <div class="cn">Candidates by years of professional experience. Domain-expert floor is 8+ years.</div>
+      <div id="expChart" style="width:100%;height:610px"></div>
+    </div>
+    <div class="card">
+      <div class="sec">2 &middot; Domain, department</div>
+      <h3>Domain segments — candidates</h3>
+      <div class="cn">Verticals grouped from department; blank departments remapped from job title.</div>
+      <div id="domainChart" style="width:100%;height:610px"></div>
+    </div>
   </div>
 </div>
 
@@ -64,31 +66,31 @@ const AX='#697078', GRID='rgba(21,23,27,.07)';
 const baseTip={backgroundColor:'#15171b',borderColor:'#2a2d33',borderWidth:1,textStyle:{color:'#f4f4f2'}};
 function sortObj(o){return Object.entries(o).sort((a,b)=>b[1]-a[1]);}
 
-// ---- 1. Experience distribution (vertical bars, ordered) ----
+// ---- 1. Experience distribution (vertical bars, ordered, large fonts) ----
 const EXP_ORDER=['8–11 yrs','12–15 yrs','16–20 yrs','20+ yrs'];
 const expB = D.by_language.All.experience_buckets;
 const expChart = echarts.init(document.getElementById('expChart'));
 expChart.setOption({
-  tooltip:{...baseTip,trigger:'axis',axisPointer:{type:'shadow'}},
-  grid:{left:14,right:24,top:16,bottom:24,containLabel:true},
-  xAxis:{type:'category',data:EXP_ORDER,axisLabel:{color:'#3a3f47',fontSize:12.5,fontWeight:500}},
-  yAxis:{type:'value',axisLabel:{color:AX,formatter:n=>n>=1000?(n/1000)+'K':n},splitLine:{lineStyle:{color:GRID}}},
-  series:[{animation:false,type:'bar',barMaxWidth:100,data:EXP_ORDER.map(k=>expB[k]),
-    itemStyle:{color:'#0e7c72',borderRadius:[5,5,0,0]},
-    label:{show:true,position:'top',color:'#3a3f47',fontSize:12,fontWeight:600,formatter:p=>p.value.toLocaleString()}}]
+  tooltip:{...baseTip,trigger:'axis',axisPointer:{type:'shadow'},textStyle:{fontSize:15}},
+  grid:{left:20,right:24,top:36,bottom:32,containLabel:true},
+  xAxis:{type:'category',data:EXP_ORDER,axisLabel:{color:'#3a3f47',fontSize:16,fontWeight:600}},
+  yAxis:{type:'value',axisLabel:{color:AX,fontSize:13,formatter:n=>n>=1000?(n/1000)+'K':n},splitLine:{lineStyle:{color:GRID}}},
+  series:[{animation:false,type:'bar',barMaxWidth:140,data:EXP_ORDER.map(k=>expB[k]),
+    itemStyle:{color:'#0e7c72',borderRadius:[6,6,0,0]},
+    label:{show:true,position:'top',color:'#3a3f47',fontSize:20,fontWeight:700,formatter:p=>p.value.toLocaleString()}}]
 });
 
-// ---- 2. Domain segments — candidates ONLY, no median line ----
-let verts=[...D.by_language.All.verticals].sort((a,b)=>b.count-a.count);
+// ---- 2. Domain segments — candidates ONLY, horizontal bars for readability, large fonts ----
+let verts=[...D.by_language.All.verticals].sort((a,b)=>b.count-a.count).reverse();
 const domainChart = echarts.init(document.getElementById('domainChart'));
 domainChart.setOption({
-  tooltip:{...baseTip,trigger:'axis',axisPointer:{type:'shadow'},
-    formatter:p=>'<b>'+p[0].axisValue+'</b><br/>Candidates: <b>'+p[0].value.toLocaleString()+'</b>'},
-  grid:{left:14,right:20,top:14,bottom:74,containLabel:true},
-  xAxis:{type:'category',data:verts.map(x=>x.name),axisLabel:{color:AX,rotate:30,fontSize:10,interval:0,margin:12},axisTick:{show:false}},
-  yAxis:{type:'value',name:'Candidates',nameTextStyle:{color:AX},nameGap:14,axisLabel:{color:AX,formatter:n=>n>=1000?(n/1000)+'K':n},splitLine:{lineStyle:{color:GRID}}},
-  series:[{animation:false,type:'bar',barMaxWidth:44,data:verts.map(x=>x.count),itemStyle:{color:'#0e7c72',borderRadius:[4,4,0,0]},
-    label:{show:true,position:'top',color:'#5a5f67',fontSize:9.5,fontWeight:500,formatter:p=>p.value.toLocaleString()}}]
+  tooltip:{...baseTip,trigger:'axis',axisPointer:{type:'shadow'},textStyle:{fontSize:15},
+    formatter:p=>'<b>'+p[0].name+'</b><br/>Candidates: <b>'+p[0].value.toLocaleString()+'</b>'},
+  grid:{left:8,right:72,top:6,bottom:6,containLabel:true},
+  xAxis:{type:'value',axisLabel:{show:false},splitLine:{show:false},axisLine:{show:false},axisTick:{show:false}},
+  yAxis:{type:'category',data:verts.map(x=>x.name),axisLabel:{color:'#3a3f47',fontSize:14,fontWeight:500},axisLine:{lineStyle:{color:'#e7e6e1'}},axisTick:{show:false}},
+  series:[{animation:false,type:'bar',barMaxWidth:26,data:verts.map(x=>x.count),itemStyle:{color:'#0e7c72',borderRadius:[0,5,5,0]},
+    label:{show:true,position:'right',color:'#3a3f47',fontSize:14,fontWeight:600,formatter:p=>p.value.toLocaleString()}}]
 });
 
 // ---- 3. Coding & tech pool by discipline ----
@@ -99,24 +101,24 @@ document.getElementById('techCaption').textContent =
 let tech = sortObj(techData).reverse();
 const techChart = echarts.init(document.getElementById('techChart'));
 techChart.setOption({
-  tooltip:{...baseTip,trigger:'axis',axisPointer:{type:'shadow'}},
-  grid:{left:8,right:56,top:6,bottom:6,containLabel:true},
+  tooltip:{...baseTip,trigger:'axis',axisPointer:{type:'shadow'},textStyle:{fontSize:15}},
+  grid:{left:8,right:66,top:6,bottom:6,containLabel:true},
   xAxis:{type:'value',axisLabel:{show:false},splitLine:{show:false},axisLine:{show:false},axisTick:{show:false}},
-  yAxis:{type:'category',data:tech.map(x=>x[0]),axisLabel:{color:AX,fontSize:11},axisLine:{lineStyle:{color:'#e7e6e1'}},axisTick:{show:false}},
-  series:[{animation:false,type:'bar',barMaxWidth:20,data:tech.map(x=>x[1]),itemStyle:{color:'#0e7c72',borderRadius:[0,4,4,0]},
-    label:{show:true,position:'right',color:'#4a4f57',fontSize:10.5,fontWeight:500,formatter:p=>p.value.toLocaleString()}}]
+  yAxis:{type:'category',data:tech.map(x=>x[0]),axisLabel:{color:'#3a3f47',fontSize:13,fontWeight:500},axisLine:{lineStyle:{color:'#e7e6e1'}},axisTick:{show:false}},
+  series:[{animation:false,type:'bar',barMaxWidth:22,data:tech.map(x=>x[1]),itemStyle:{color:'#0e7c72',borderRadius:[0,4,4,0]},
+    label:{show:true,position:'right',color:'#3a3f47',fontSize:13,fontWeight:600,formatter:p=>p.value.toLocaleString()}}]
 });
 
 // ---- 4. PhDs by field ----
 let phd = sortObj(F.phd_families || {}).reverse();
 const phdChart = echarts.init(document.getElementById('phdChart'));
 phdChart.setOption({
-  tooltip:{...baseTip,trigger:'axis',axisPointer:{type:'shadow'}},
-  grid:{left:8,right:56,top:6,bottom:6,containLabel:true},
+  tooltip:{...baseTip,trigger:'axis',axisPointer:{type:'shadow'},textStyle:{fontSize:15}},
+  grid:{left:8,right:66,top:6,bottom:6,containLabel:true},
   xAxis:{type:'value',axisLabel:{show:false},splitLine:{show:false},axisLine:{show:false},axisTick:{show:false}},
-  yAxis:{type:'category',data:phd.map(x=>x[0]),axisLabel:{color:AX,fontSize:11},axisLine:{lineStyle:{color:'#e7e6e1'}},axisTick:{show:false}},
-  series:[{animation:false,type:'bar',barMaxWidth:20,data:phd.map(x=>x[1]),itemStyle:{color:'#8b7ec8',borderRadius:[0,4,4,0]},
-    label:{show:true,position:'right',color:'#4a4f57',fontSize:10.5,fontWeight:500,formatter:p=>p.value.toLocaleString()}}]
+  yAxis:{type:'category',data:phd.map(x=>x[0]),axisLabel:{color:'#3a3f47',fontSize:13,fontWeight:500},axisLine:{lineStyle:{color:'#e7e6e1'}},axisTick:{show:false}},
+  series:[{animation:false,type:'bar',barMaxWidth:22,data:phd.map(x=>x[1]),itemStyle:{color:'#8b7ec8',borderRadius:[0,4,4,0]},
+    label:{show:true,position:'right',color:'#3a3f47',fontSize:13,fontWeight:600,formatter:p=>p.value.toLocaleString()}}]
 });
 </script>
 </body>
